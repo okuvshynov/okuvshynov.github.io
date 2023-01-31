@@ -15,6 +15,10 @@
     As unroll gets more extreme, we see less instructions, as expected. Time and cycles, however, have a different trend for each core type: for Icestorm, we get improvements as we get more extreme, but Firestorm performs the best without the unrolling. 
     This is an illustration of the idea that in some of the cases when the same code needs to run on all 8 cores of the M1 CPU, it might make sense to have a specialized (potentially just differently compiled) implementation for Firestorm and Icestorm to utilize each core type better.
 
+    Update: results for Apple M2:
+    <img style='display: block; margin-left: auto; margin-right: auto;' src='m2cores.png'/><br/>
+
+    
     <h4>How the cycles and instructions are measured?</h4>
 
     From <a href="https://lemire.me/blog/2021/03/24/counting-cycles-and-instructions-on-the-apple-m1-processor/">Daniel Lemire's blog</a> I've learned that there is a not-very-documented API for getting the PMU counters on OS X. I've added these counters to <a href="https://github.com/okuvshynov/b63">b63</a> benchmarking tool and used it to measure instructions and cycles.
