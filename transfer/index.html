@@ -3,6 +3,7 @@
     <title>Learning board value from action inputs only</title>
   </head>
   <body>
+    <a href='https://okuvshynov.github.io/'>Home</a><br/>
     <h3>Learning board value from action inputs only</h3>
     <p>
     Here we look at self-play loop played for game Othello on 6x6 board. Similar to what Alpha Go Zero did years ago, it is continously playing against itself to collect training data, uses that data to train new model and evaluates the model.</p>
@@ -15,7 +16,7 @@
     </p>
 
     <p>
-    In current setup, we ignore value prediction entirely and not take value loss in training process at all - we only optimize for action. <a href='https://github.com/okuvshynov/rlscout/blob/247db981e4a3e6a7c7b5a8568de6f8cc4cd020ba/rlscout/train_loop.py#L31'>Here</a> we set the weight for that output during training to be 0.
+    In current setup, we ignore value prediction entirely and not take value loss in training process at all - we only optimize for action. <a href='https://github.com/okuvshynov/rlscout/blob/247db981e4a3e6a7c7b5a8568de6f8cc4cd020ba/rlscout/train_loop.py#L31'>Here</a> we set the weight for the loss during training to be 0.
     </p>
 
     <img style='display: block; margin-left: auto; margin-right: auto;' src='action_only.png'/><br/>
