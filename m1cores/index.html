@@ -1,9 +1,9 @@
 <html>
   <head>
-    <title>Apple M1: Firestorm and Icestorm difference</title>
+    <title>Apple M1/M2: Firestorm and Icestorm difference</title>
   </head>
   <body>
-    <h3>Apple M1: Firestorm and Icestorm difference</h3>
+    <h3>Apple M1/M2: Firestorm and Icestorm difference</h3>
     <p>
     Apple M1 processor has 4 Firestorm (performance) cores and 4 Icestorm (efficiency) cores. While official details are scarce, <a href="https://dougallj.github.io/applecpu/firestorm.html">Firestorm</a> and <a href="https://dougallj.github.io/applecpu/icestorm.html">Icestorm</a> by <a href="https://twitter.com/dougallj">Dougall Johnson</a> provide a great overview of the microarchitecture. There are many differences between the two types of cores: execution ports, cache size, etc. This heterogeneity implies: when the compiler or programmer tries to optimize for M1 CPU, the best code generated for Icestorm and Firestorm cores could often be different.</p>
     <p> <a href="https://github.com/okuvshynov/experiments/tree/main/m1cores/m1cores.cpp">This benchmark</a> is a simple synthetic example of that; it implements pointer chasing in a small buffer with some work done in a loop and measures the impact of unrolling the loop with different factors on Icestorm and Firestorm cores.</p>
