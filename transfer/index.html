@@ -21,4 +21,6 @@
     <img style='display: block; margin-left: auto; margin-right: auto;' src='action_only.png'/><br/>
 
     Still, as we can see here, loss for value output is declining as we train our model, despite value part of the model still being in randomly-initialized state and only shared part optimized for a different (but related) objective. It is not particularly surprising, but still fun to observe.
+    If we wait longer though, we'll see how the loss started going up again, likely as shared part of the model gets more specialized in action part rather than learning generic facts about the game and board.
 
+    <img style='display: block; margin-left: auto; margin-right: auto;' src='overfit.png'/><br/>
