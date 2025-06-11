@@ -1,0 +1,6 @@
+1. filtering (in the column itself)
+2. column selection
+3. aggregation (custom by column)
+4. comparison mode
+5. url params
+6. export as md, csv
