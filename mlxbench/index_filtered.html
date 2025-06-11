@@ -373,6 +373,15 @@
             });
             
             filteredData = dimensions[columns[0].key].top(Infinity);
+            
+            // Reset baseline if it's not in the filtered data
+            if (baselineIndex !== null) {
+                const baselineRow = currentData[baselineIndex];
+                if (!filteredData.includes(baselineRow)) {
+                    baselineIndex = null;
+                }
+            }
+            
             updateActiveFiltersDisplay();
             updateResultsCount();
         }
