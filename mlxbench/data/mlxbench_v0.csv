@@ -1,0 +1,25 @@
+run,model,hw_model,n_prompt,n_generate,max_kv_size,kv_bits,kv_group_size,quantized_kv_start,prefill_step_size,prompt_tokens,prompt_tps,generation_tokens,generation_tps,peak_memory_gb
+1,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,8,None,None,64,0,2048,1024,397.870,8,44.556,16.567
+2,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,8,None,None,64,0,2048,1024,402.898,8,44.559,16.567
+3,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,16,None,None,64,0,2048,1024,403.802,16,41.775,16.567
+4,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,16,None,None,64,0,2048,1024,403.715,16,41.858,16.567
+5,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,32,None,None,64,0,2048,1024,403.404,32,40.501,16.567
+6,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,32,None,None,64,0,2048,1024,403.498,32,40.554,16.567
+7,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,8,None,None,64,0,2048,2048,405.179,8,42.975,17.170
+8,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,8,None,None,64,0,2048,2048,405.251,8,43.042,17.170
+9,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,16,None,None,64,0,2048,2048,405.504,16,40.755,17.170
+10,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,16,None,None,64,0,2048,2048,405.474,16,40.621,17.170
+11,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,32,None,None,64,0,2048,2048,405.344,32,39.479,17.170
+12,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,32,None,None,64,0,2048,2048,405.504,32,39.601,17.170
+13,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,8,None,None,64,0,2048,4096,411.359,8,40.869,17.530
+14,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,8,None,None,64,0,2048,4096,411.244,8,40.879,17.530
+15,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,16,None,None,64,0,2048,4096,410.640,16,38.633,17.530
+16,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,16,None,None,64,0,2048,4096,411.266,16,38.688,17.530
+17,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,32,None,None,64,0,2048,4096,411.314,32,37.755,17.530
+18,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,32,None,None,64,0,2048,4096,411.198,32,37.837,17.530
+19,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,8,None,None,64,0,2048,8192,400.627,8,36.293,18.197
+20,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,8,None,None,64,0,2048,8192,400.485,8,36.247,18.197
+21,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,16,None,None,64,0,2048,8192,400.404,16,35.388,18.197
+22,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,16,None,None,64,0,2048,8192,400.339,16,35.231,18.197
+23,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,32,None,None,64,0,2048,8192,400.100,32,34.818,18.197
+24,mlx-community/Qwen3-14B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,32,None,None,64,0,2048,8192,400.316,32,34.752,18.197
