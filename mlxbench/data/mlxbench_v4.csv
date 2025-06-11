@@ -1,0 +1,13 @@
+run,model,hw_model,n_prompt,n_generate,max_kv_size,kv_bits,kv_group_size,quantized_kv_start,prefill_step_size,prompt_tokens,prompt_tps,generation_tokens,generation_tps,peak_memory_gb
+1,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,1024,8,None,None,64,0,2048,1024,52.981,8,11.867,9.290
+2,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,1024,16,None,None,64,0,2048,1024,53.849,16,11.114,9.290
+3,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,1024,32,None,None,64,0,2048,1024,53.890,32,10.725,9.290
+4,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,2048,8,None,None,64,0,2048,2048,53.407,8,11.540,9.815
+5,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,2048,16,None,None,64,0,2048,2048,53.424,16,10.745,9.815
+6,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,2048,32,None,None,64,0,2048,2048,53.428,32,10.379,9.815
+7,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,4096,8,None,None,64,0,2048,4096,54.331,8,10.802,10.176
+8,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,4096,16,None,None,64,0,2048,4096,49.538,16,9.910,10.176
+9,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,4096,32,None,None,64,0,2048,4096,46.429,32,9.471,10.176
+10,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,8192,8,None,None,64,0,2048,8192,43.876,8,9.310,10.792
+11,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,8192,16,None,None,64,0,2048,8192,41.900,16,8.427,10.792
+12,mlx-community/Qwen3-14B-4bit-DWQ-053125,m2_24gb_10gpu,8192,32,None,None,64,0,2048,8192,40.417,32,7.666,10.792
