@@ -260,22 +260,13 @@
             font-size: 13px;
         }
         
-        .aggregation-mode {
+        .aggregation-select {
             font-size: 11px;
             padding: 2px 4px;
-            background-color: #ddd;
+            border: 1px solid #ddd;
             border-radius: 3px;
             margin-left: 4px;
-            cursor: pointer;
-        }
-        
-        .aggregation-mode:hover {
-            background-color: #ccc;
-        }
-        
-        .aggregation-mode.active {
-            background-color: #4caf50;
-            color: white;
+            background-color: #f9f9f9;
         }
         
         .grouped-cell {
@@ -320,6 +311,7 @@
         let filteredData = [];
         let groupedData = [];
         let baselineIndex = null;
+        let baselineGroupKey = null;
         let crossfilterData;
         let dimensions = {};
         let filters = {};
@@ -593,9 +585,11 @@
             if (groupByColumn === columnKey) {
                 groupByColumn = null;
                 baselineIndex = null; // Reset baseline when ungrouping
+                baselineGroupKey = null;
             } else {
                 groupByColumn = columnKey;
                 baselineIndex = null; // Reset baseline when changing group
+                baselineGroupKey = null;
             }
             applyFilters();
             renderTable();
@@ -641,13 +635,18 @@
                 
                 // Add aggregation mode selector for numeric columns when grouped
                 if (groupByColumn && col.type === 'number' && !col.canGroupBy) {
+                    const select = labelDiv.append('select')
+                        .attr('class', 'aggregation-select')
+                        .on('change', function() {
+                            setAggregationMode(col.key, this.value);
+                        });
+                    
                     const modes = ['avg', 'sum', 'min', 'max'];
                     modes.forEach(mode => {
-                        labelDiv.append('span')
-                            .attr('class', 'aggregation-mode')
-                            .classed('active', aggregationModes[col.key] === mode)
-                            .text(mode)
-                            .on('click', () => setAggregationMode(col.key, mode));
+                        select.append('option')
+                            .attr('value', mode)
+                            .property('selected', aggregationModes[col.key] === mode)
+                            .text(mode);
                     });
                 }
                 
@@ -747,8 +746,9 @@
                     // Check if this row was the baseline
                     if (!groupByColumn) {
                         return baselineIndex !== null && currentData[baselineIndex] === d;
+                    } else {
+                        return baselineGroupKey !== null && d[groupByColumn] === baselineGroupKey;
                     }
-                    return false; // No baseline for grouped data
                 })
                 .on('click', function(event, d) {
                     if (!groupByColumn) {
@@ -760,9 +760,16 @@
                         } else {
                             baselineIndex = originalIndex;
                         }
-                        
-                        renderTable();
+                    } else {
+                        // For grouped data, use the group key as baseline
+                        if (baselineGroupKey === d[groupByColumn]) {
+                            baselineGroupKey = null;
+                        } else {
+                            baselineGroupKey = d[groupByColumn];
+                        }
                     }
+                    
+                    renderTable();
                 });
             
             // Create cells
@@ -797,18 +804,43 @@
                 .html(d => {
                     // Handle grouped data display
                     if (groupByColumn) {
-                        if (d.column.type === 'number' || d.column.key === '_count') {
+                        // Special handling for grouped column and count
+                        if (d.column.key === groupByColumn || d.column.key === '_count') {
                             const value = typeof d.value === 'number' ? d.value.toFixed(3) : d.value;
-                            if (d.column.key !== '_count' && d.column.key !== groupByColumn) {
-                                const mode = aggregationModes[d.column.key] || 'avg';
-                                return `<div class="aggregated-value">${value} <span style="font-size: 11px; color: #888;">(${mode})</span></div>`;
+                            if (d.column.key === groupByColumn && baselineGroupKey === d.value) {
+                                return value + '<span class="baseline-indicator">BASELINE</span>';
                             }
                             return value;
                         }
-                        return d.value;
+                        
+                        // For string columns showing unique values
+                        if (d.column.type === 'string') {
+                            return d.value;
+                        }
+                        
+                        // For numeric columns with baseline comparison
+                        if (d.column.type === 'number' && baselineGroupKey !== null) {
+                            const value = d.value;
+                            
+                            // Check if this is the baseline row
+                            if (d.row[groupByColumn] === baselineGroupKey) {
+                                return value.toFixed(3) + '<span class="baseline-indicator">BASELINE</span>';
+                            }
+                            
+                            // Find baseline row for comparison
+                            const baselineRow = groupedData.find(r => r[groupByColumn] === baselineGroupKey);
+                            if (baselineRow) {
+                                const baselineValue = baselineRow[d.column.key];
+                                return formatDiff(value, baselineValue, d.column.isHigherBetter);
+                            }
+                        }
+                        
+                        // Default numeric display
+                        const value = typeof d.value === 'number' ? d.value.toFixed(3) : d.value;
+                        return value;
                     }
                     
-                    // Normal display logic
+                    // Normal (non-grouped) display logic
                     if (!d.column.isMetric || baselineIndex === null) {
                         if (typeof d.value === 'number' && d.column.isMetric) {
                             return d.value.toFixed(3);
