@@ -12,6 +12,10 @@ The project uses a simple static site structure:
 - **Main site**: `index.html` serves as the landing page
 - **MLX Benchmark Tool**: `mlxbench/index_aggregated.html` provides an advanced interactive data visualization
   - Uses D3.js for visualization and Crossfilter for data manipulation
+  - Modular file structure:
+    - `index_aggregated.html` - Main application logic and UI
+    - `styles.css` - All CSS styling
+    - `data-loader.js` - CSV loading and merging functionality
   - Automatically loads all CSV files matching the pattern `mlxbench_v*.csv`
   - Implements baseline comparison functionality where clicking any row sets it as the comparison baseline
 
