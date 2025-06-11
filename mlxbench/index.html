@@ -125,22 +125,55 @@
         let baselineIndex = null;
         let crossfilterData;
         
-        // Load and process CSV data
-        d3.csv('data/mlxbench_v0.csv').then(function(data) {
-            // Convert numeric columns
-            data.forEach(d => {
-                d.prompt_tokens = +d.prompt_tokens;
-                d.generation_tokens = +d.generation_tokens;
-                d.prompt_tps = +d.prompt_tps;
-                d.generation_tps = +d.generation_tps;
-                d.peak_memory_gb = +d.peak_memory_gb;
-            });
+        // Try to load multiple CSV files
+        async function loadAllCSVFiles() {
+            const allData = [];
+            let fileIndex = 0;
+            const loadingStatus = d3.select('.info')
+                .append('div')
+                .style('margin-top', '10px')
+                .text('Loading data files...');
             
-            currentData = data;
-            crossfilterData = crossfilter(data);
+            // Keep trying to load files until we get a 404
+            while (true) {
+                try {
+                    const response = await fetch(`data/mlxbench_v${fileIndex}.csv`);
+                    if (!response.ok) break;
+                    
+                    const text = await response.text();
+                    const data = d3.csvParse(text);
+                    
+                    // Convert numeric columns
+                    data.forEach(d => {
+                        d.prompt_tokens = +d.prompt_tokens;
+                        d.generation_tokens = +d.generation_tokens;
+                        d.prompt_tps = +d.prompt_tps;
+                        d.generation_tps = +d.generation_tps;
+                        d.peak_memory_gb = +d.peak_memory_gb;
+                        d.source_file = `mlxbench_v${fileIndex}.csv`; // Track which file each row came from
+                    });
+                    
+                    allData.push(...data);
+                    fileIndex++;
+                } catch (error) {
+                    break;
+                }
+            }
             
+            if (allData.length === 0) {
+                loadingStatus.text('No data files found!').style('color', 'red');
+                return;
+            }
+            
+            loadingStatus.text(`Loaded ${fileIndex} file(s) with ${allData.length} total rows`);
+            
+            currentData = allData;
+            crossfilterData = crossfilter(allData);
             renderTable();
-        });
+        }
+        
+        // Load all CSV files on page load
+        loadAllCSVFiles();
         
         function formatDiff(value, baseline, isHigherBetter) {
             if (baseline === null || value === baseline) {
@@ -171,6 +204,7 @@
             
             // Define columns
             const columns = [
+                { key: 'source_file', label: 'Source' },
                 { key: 'model', label: 'Model' },
                 { key: 'hw_model', label: 'Hardware' },
                 { key: 'prompt_tokens', label: 'Prompt Tokens' },
