@@ -315,7 +315,7 @@
         let crossfilterData;
         let dimensions = {};
         let filters = {};
-        let groupByColumn = null;
+        let groupByColumns = [];
         let aggregationModes = {};
         
         // Define columns
@@ -463,7 +463,7 @@
             }
             
             // Apply grouping if active
-            if (groupByColumn) {
+            if (groupByColumns.length > 0) {
                 applyGrouping();
             }
             
@@ -472,12 +472,30 @@
         }
         
         function applyGrouping() {
-            const groups = d3.group(filteredData, d => d[groupByColumn]);
+            // Create group function for multiple columns
+            const groupFn = groupByColumns.length === 1 
+                ? d => d[groupByColumns[0]]
+                : d => groupByColumns.map(col => d[col]).join('|||');
+            
+            const groups = d3.group(filteredData, groupFn);
             groupedData = Array.from(groups, ([key, values]) => {
-                const grouped = { [groupByColumn]: key };
+                const grouped = {};
+                
+                // Set values for grouped columns
+                if (groupByColumns.length === 1) {
+                    grouped[groupByColumns[0]] = key;
+                } else {
+                    const keyParts = key.split('|||');
+                    groupByColumns.forEach((col, i) => {
+                        grouped[col] = keyParts[i];
+                    });
+                }
+                
+                // Store composite key for baseline comparison
+                grouped._groupKey = key;
                 
                 columns.forEach(col => {
-                    if (col.key === groupByColumn) return;
+                    if (groupByColumns.includes(col.key)) return;
                     
                     if (col.type === 'string') {
                         // For categorical columns, show unique values
@@ -519,10 +537,10 @@
         
         function updateAggregationInfo() {
             const info = d3.select('#aggregation-info');
-            if (groupByColumn) {
-                const column = columns.find(c => c.key === groupByColumn);
+            if (groupByColumns.length > 0) {
+                const columnLabels = groupByColumns.map(key => columns.find(c => c.key === key).label);
                 info.style('display', 'block')
-                    .text(`Grouped by: ${column.label} (${groupedData.length} groups from ${filteredData.length} rows)`);
+                    .text(`Grouped by: ${columnLabels.join(', ')} (${groupedData.length} groups from ${filteredData.length} rows)`);
             } else {
                 info.style('display', 'none');
             }
@@ -551,9 +569,9 @@
         }
         
         function updateResultsCount() {
-            const displayData = groupByColumn ? groupedData : filteredData;
+            const displayData = groupByColumns.length > 0 ? groupedData : filteredData;
             d3.select('#results-count')
-                .text(`Showing ${displayData.length} ${groupByColumn ? 'groups' : 'rows'} of ${currentData.length} total`);
+                .text(`Showing ${displayData.length} ${groupByColumns.length > 0 ? 'groups' : 'rows'} of ${currentData.length} total`);
         }
         
         function addFilter(columnKey, operator, value) {
@@ -582,22 +600,26 @@
         }
         
         function toggleGroupBy(columnKey) {
-            if (groupByColumn === columnKey) {
-                groupByColumn = null;
-                baselineIndex = null; // Reset baseline when ungrouping
-                baselineGroupKey = null;
+            const index = groupByColumns.indexOf(columnKey);
+            if (index > -1) {
+                // Remove from group by
+                groupByColumns.splice(index, 1);
             } else {
-                groupByColumn = columnKey;
-                baselineIndex = null; // Reset baseline when changing group
-                baselineGroupKey = null;
+                // Add to group by
+                groupByColumns.push(columnKey);
             }
+            
+            // Reset baseline when changing grouping
+            baselineIndex = null;
+            baselineGroupKey = null;
+            
             applyFilters();
             renderTable();
         }
         
         function setAggregationMode(columnKey, mode) {
             aggregationModes[columnKey] = mode;
-            if (groupByColumn) {
+            if (groupByColumns.length > 0) {
                 applyFilters();
                 renderTable();
             }
@@ -611,7 +633,7 @@
             const thead = table.append('thead');
             const tbody = table.append('tbody');
             
-            const displayData = groupByColumn ? groupedData : filteredData;
+            const displayData = groupByColumns.length > 0 ? groupedData : filteredData;
             
             // Create header with filter controls
             const headerRow = thead.append('tr');
@@ -628,13 +650,13 @@
                 if (col.canGroupBy) {
                     const groupBtn = labelDiv.append('button')
                         .attr('class', 'group-by-btn')
-                        .classed('active', groupByColumn === col.key)
+                        .classed('active', groupByColumns.includes(col.key))
                         .text('Group By')
                         .on('click', () => toggleGroupBy(col.key));
                 }
                 
                 // Add aggregation mode selector for numeric columns when grouped
-                if (groupByColumn && col.type === 'number' && !col.canGroupBy) {
+                if (groupByColumns.length > 0 && col.type === 'number' && !col.canGroupBy) {
                     const select = labelDiv.append('select')
                         .attr('class', 'aggregation-select')
                         .on('change', function() {
@@ -730,7 +752,7 @@
             });
             
             // Add row count column if grouped
-            if (groupByColumn) {
+            if (groupByColumns.length > 0) {
                 const th = headerRow.append('th');
                 th.append('div').attr('class', 'column-header')
                     .append('div').attr('class', 'column-label')
@@ -744,14 +766,14 @@
                 .append('tr')
                 .classed('baseline', (d, i) => {
                     // Check if this row was the baseline
-                    if (!groupByColumn) {
+                    if (groupByColumns.length === 0) {
                         return baselineIndex !== null && currentData[baselineIndex] === d;
                     } else {
-                        return baselineGroupKey !== null && d[groupByColumn] === baselineGroupKey;
+                        return baselineGroupKey !== null && d._groupKey === baselineGroupKey;
                     }
                 })
                 .on('click', function(event, d) {
-                    if (!groupByColumn) {
+                    if (groupByColumns.length === 0) {
                         // Find the index in the original data
                         const originalIndex = currentData.indexOf(d);
                         
@@ -761,11 +783,11 @@
                             baselineIndex = originalIndex;
                         }
                     } else {
-                        // For grouped data, use the group key as baseline
-                        if (baselineGroupKey === d[groupByColumn]) {
+                        // For grouped data, use the composite group key as baseline
+                        if (baselineGroupKey === d._groupKey) {
                             baselineGroupKey = null;
                         } else {
-                            baselineGroupKey = d[groupByColumn];
+                            baselineGroupKey = d._groupKey;
                         }
                     }
                     
@@ -779,9 +801,9 @@
                         value: row[col.key],
                         column: col,
                         row: row,
-                        isGrouped: col.key === groupByColumn
+                        isGrouped: groupByColumns.includes(col.key)
                     }));
-                    if (groupByColumn) {
+                    if (groupByColumns.length > 0) {
                         cells.push({
                             value: row._count,
                             column: { key: '_count', label: 'Count', type: 'number' },
@@ -795,19 +817,19 @@
                 .classed('metric-cell', d => d.column.isMetric)
                 .classed('grouped-cell', d => d.isGrouped)
                 .classed('unique-values', d => {
-                    return groupByColumn && 
+                    return groupByColumns.length > 0 && 
                            d.column.type === 'string' && 
-                           d.column.key !== groupByColumn &&
+                           !groupByColumns.includes(d.column.key) &&
                            typeof d.value === 'string' &&
                            d.value.includes('unique values');
                 })
                 .html(d => {
                     // Handle grouped data display
-                    if (groupByColumn) {
-                        // Special handling for grouped column and count
-                        if (d.column.key === groupByColumn || d.column.key === '_count') {
+                    if (groupByColumns.length > 0) {
+                        // Special handling for grouped columns and count
+                        if (groupByColumns.includes(d.column.key) || d.column.key === '_count') {
                             const value = typeof d.value === 'number' ? d.value.toFixed(3) : d.value;
-                            if (d.column.key === groupByColumn && baselineGroupKey === d.value) {
+                            if (groupByColumns.includes(d.column.key) && baselineGroupKey === d.row._groupKey) {
                                 return value + '<span class="baseline-indicator">BASELINE</span>';
                             }
                             return value;
@@ -823,12 +845,12 @@
                             const value = d.value;
                             
                             // Check if this is the baseline row
-                            if (d.row[groupByColumn] === baselineGroupKey) {
+                            if (d.row._groupKey === baselineGroupKey) {
                                 return value.toFixed(3) + '<span class="baseline-indicator">BASELINE</span>';
                             }
                             
                             // Find baseline row for comparison
-                            const baselineRow = groupedData.find(r => r[groupByColumn] === baselineGroupKey);
+                            const baselineRow = groupedData.find(r => r._groupKey === baselineGroupKey);
                             if (baselineRow) {
                                 const baselineValue = baselineRow[d.column.key];
                                 return formatDiff(value, baselineValue, d.column.isHigherBetter);
