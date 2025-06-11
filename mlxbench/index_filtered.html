@@ -114,6 +114,42 @@
             gap: 4px;
         }
         
+        .column-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toggle-filter-btn {
+            font-size: 11px;
+            padding: 2px 6px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-radius: 3px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+        
+        .toggle-filter-btn:hover {
+            background-color: #e9e9e9;
+            color: #333;
+        }
+        
+        .toggle-filter-btn.active {
+            background-color: #2196f3;
+            color: white;
+            border-color: #2196f3;
+        }
+        
+        .filter-controls {
+            display: none;
+        }
+        
+        .filter-controls.show {
+            display: block;
+        }
+        
         .filter-container {
             display: flex;
             align-items: center;
@@ -453,9 +489,20 @@
                 const th = headerRow.append('th');
                 const headerDiv = th.append('div').attr('class', 'column-header');
                 
-                // Column label
-                const labelDiv = headerDiv.append('div');
+                // Column label with filter toggle
+                const labelDiv = headerDiv.append('div').attr('class', 'column-label');
                 labelDiv.append('span').text(col.label);
+                
+                const toggleBtn = labelDiv.append('button')
+                    .attr('class', 'toggle-filter-btn')
+                    .classed('active', filters[col.key].length > 0)
+                    .text('Filter')
+                    .on('click', function() {
+                        const filterControls = d3.select(this.parentNode.parentNode).select('.filter-controls');
+                        const isShowing = filterControls.classed('show');
+                        filterControls.classed('show', !isShowing);
+                        d3.select(this).classed('active', !isShowing || filters[col.key].length > 0);
+                    });
                 
                 if (filters[col.key].length > 0) {
                     labelDiv.append('button')
@@ -464,9 +511,14 @@
                         .on('click', () => clearColumnFilters(col.key));
                 }
                 
+                // Filter controls container (hidden by default)
+                const filterControlsDiv = headerDiv.append('div')
+                    .attr('class', 'filter-controls')
+                    .classed('show', filters[col.key].length > 0);
+                
                 // Existing filters
                 filters[col.key].forEach(filter => {
-                    const filterDiv = headerDiv.append('div').attr('class', 'filter-container');
+                    const filterDiv = filterControlsDiv.append('div').attr('class', 'filter-container');
                     const filterInput = filterDiv.append('div').attr('class', 'filter-input');
                     
                     filterInput.append('span')
@@ -484,7 +536,7 @@
                 });
                 
                 // Add new filter controls
-                const newFilterDiv = headerDiv.append('div').attr('class', 'filter-container');
+                const newFilterDiv = filterControlsDiv.append('div').attr('class', 'filter-container');
                 const filterInput = newFilterDiv.append('div').attr('class', 'filter-input');
                 
                 const operatorSelect = filterInput.append('select')
