@@ -828,7 +828,13 @@
                     if (groupByColumns.length > 0) {
                         // Special handling for grouped columns and count
                         if (groupByColumns.includes(d.column.key) || d.column.key === '_count') {
-                            const value = typeof d.value === 'number' ? d.value.toFixed(3) : d.value;
+                            let value;
+                            if (d.column.key === '_count') {
+                                // Format count as integer
+                                value = d.value.toString();
+                            } else {
+                                value = typeof d.value === 'number' ? d.value.toFixed(3) : d.value;
+                            }
                             if (groupByColumns.includes(d.column.key) && baselineGroupKey === d.row._groupKey) {
                                 return value + '<span class="baseline-indicator">BASELINE</span>';
                             }
