@@ -1,25 +1,25 @@
 run,model,hw_model,n_prompt,n_generate,max_kv_size,kv_bits,kv_group_size,quantized_kv_start,prefill_step_size,prompt_tokens,prompt_tps,generation_tokens,generation_tps,peak_memory_gb
-1,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,8,None,None,64,0,2048,1024,1133.993,8,78.334,33.329
-2,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,8,None,None,64,0,2048,1024,1180.789,8,79.068,33.329
-3,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,16,None,None,64,0,2048,1024,1181.082,16,75.686,33.329
-4,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,16,None,None,64,0,2048,1024,1180.894,16,75.848,33.329
-5,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,32,None,None,64,0,2048,1024,1181.477,32,74.373,33.329
-6,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,1024,32,None,None,64,0,2048,1024,1180.750,32,73.731,33.329
-7,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,8,None,None,64,0,2048,2048,1229.764,8,73.230,33.876
-8,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,8,None,None,64,0,2048,2048,1231.925,8,73.867,33.876
-9,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,16,None,None,64,0,2048,2048,1231.708,16,72.704,33.876
-10,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,16,None,None,64,0,2048,2048,1231.436,16,70.991,33.876
-11,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,32,None,None,64,0,2048,2048,1231.624,32,72.037,33.876
-12,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,2048,32,None,None,64,0,2048,2048,1231.609,32,71.764,33.876
-13,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,8,None,None,64,0,2048,4096,1212.612,8,68.559,34.099
-14,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,8,None,None,64,0,2048,4096,1210.890,8,68.152,34.099
-15,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,16,None,None,64,0,2048,4096,1213.164,16,67.770,34.099
-16,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,16,None,None,64,0,2048,4096,1211.149,16,67.923,34.099
-17,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,32,None,None,64,0,2048,4096,1212.805,32,67.075,34.099
-18,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,4096,32,None,None,64,0,2048,4096,1212.671,32,67.033,34.099
-19,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,8,None,None,64,0,2048,8192,1087.242,8,59.575,34.519
-20,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,8,None,None,64,0,2048,8192,1086.858,8,59.347,34.519
-21,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,16,None,None,64,0,2048,8192,1087.433,16,60.254,34.519
-22,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,16,None,None,64,0,2048,8192,1088.382,16,60.173,34.519
-23,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,32,None,None,64,0,2048,8192,1088.907,32,59.880,34.519
-24,mlx-community/Qwen3-30B-A3B-8bit,M2 Ultra | 192.0GB | 76 GPU cores,8192,32,None,None,64,0,2048,8192,1088.659,32,59.904,34.519
+1,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,1024,8,None,None,64,0,2048,1024,1133.993,8,78.334,33.329
+2,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,1024,8,None,None,64,0,2048,1024,1180.789,8,79.068,33.329
+3,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,1024,16,None,None,64,0,2048,1024,1181.082,16,75.686,33.329
+4,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,1024,16,None,None,64,0,2048,1024,1180.894,16,75.848,33.329
+5,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,1024,32,None,None,64,0,2048,1024,1181.477,32,74.373,33.329
+6,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,1024,32,None,None,64,0,2048,1024,1180.750,32,73.731,33.329
+7,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,2048,8,None,None,64,0,2048,2048,1229.764,8,73.230,33.876
+8,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,2048,8,None,None,64,0,2048,2048,1231.925,8,73.867,33.876
+9,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,2048,16,None,None,64,0,2048,2048,1231.708,16,72.704,33.876
+10,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,2048,16,None,None,64,0,2048,2048,1231.436,16,70.991,33.876
+11,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,2048,32,None,None,64,0,2048,2048,1231.624,32,72.037,33.876
+12,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,2048,32,None,None,64,0,2048,2048,1231.609,32,71.764,33.876
+13,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,4096,8,None,None,64,0,2048,4096,1212.612,8,68.559,34.099
+14,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,4096,8,None,None,64,0,2048,4096,1210.890,8,68.152,34.099
+15,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,4096,16,None,None,64,0,2048,4096,1213.164,16,67.770,34.099
+16,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,4096,16,None,None,64,0,2048,4096,1211.149,16,67.923,34.099
+17,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,4096,32,None,None,64,0,2048,4096,1212.805,32,67.075,34.099
+18,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,4096,32,None,None,64,0,2048,4096,1212.671,32,67.033,34.099
+19,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,8192,8,None,None,64,0,2048,8192,1087.242,8,59.575,34.519
+20,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,8192,8,None,None,64,0,2048,8192,1086.858,8,59.347,34.519
+21,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,8192,16,None,None,64,0,2048,8192,1087.433,16,60.254,34.519
+22,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,8192,16,None,None,64,0,2048,8192,1088.382,16,60.173,34.519
+23,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,8192,32,None,None,64,0,2048,8192,1088.907,32,59.880,34.519
+24,mlx-community/Qwen3-30B-A3B-8bit,m2ultra_192gb_76gpu,8192,32,None,None,64,0,2048,8192,1088.659,32,59.904,34.519

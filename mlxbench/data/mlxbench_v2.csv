@@ -1,25 +1,25 @@
 run,model,hw_model,n_prompt,n_generate,max_kv_size,kv_bits,kv_group_size,quantized_kv_start,prefill_step_size,prompt_tokens,prompt_tps,generation_tokens,generation_tps,peak_memory_gb
-1,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,1024,8,None,None,64,0,2048,1024,177.492,8,28.341,133.358
-2,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,1024,8,None,None,64,0,2048,1024,179.040,8,28.779,133.358
-3,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,1024,16,None,None,64,0,2048,1024,179.063,16,27.114,133.358
-4,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,1024,16,None,None,64,0,2048,1024,179.120,16,27.192,133.358
-5,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,1024,32,None,None,64,0,2048,1024,179.116,32,26.521,133.358
-6,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,1024,32,None,None,64,0,2048,1024,179.142,32,26.454,133.358
-7,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,2048,8,None,None,64,0,2048,2048,186.847,8,27.192,134.102
-8,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,2048,8,None,None,64,0,2048,2048,186.895,8,27.459,134.102
-9,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,2048,16,None,None,64,0,2048,2048,186.885,16,26.159,134.102
-10,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,2048,16,None,None,64,0,2048,2048,186.870,16,26.066,134.102
-11,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,2048,32,None,None,64,0,2048,2048,186.913,32,25.525,134.102
-12,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,2048,32,None,None,64,0,2048,2048,186.880,32,25.505,134.102
-13,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,4096,8,None,None,64,0,2048,4096,184.902,8,25.163,134.509
-14,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,4096,8,None,None,64,0,2048,4096,184.875,8,25.171,134.509
-15,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,4096,16,None,None,64,0,2048,4096,184.823,16,24.235,134.509
-16,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,4096,16,None,None,64,0,2048,4096,184.818,16,24.142,134.509
-17,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,4096,32,None,None,64,0,2048,4096,184.893,32,23.771,134.509
-18,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,4096,32,None,None,64,0,2048,4096,184.901,32,23.693,134.509
-19,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,8192,8,None,None,64,0,2048,8192,174.079,8,22.008,135.306
-20,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,8192,8,None,None,64,0,2048,8192,173.821,8,21.840,135.306
-21,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,8192,16,None,None,64,0,2048,8192,174.015,16,21.338,135.306
-22,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,8192,16,None,None,64,0,2048,8192,174.008,16,21.365,135.306
-23,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,8192,32,None,None,64,0,2048,8192,174.002,32,21.136,135.306
-24,mlx-community/Qwen3-235B-A22B-4bit-DWQ,M2 Ultra | 192.0GB | 76 GPU cores,8192,32,None,None,64,0,2048,8192,173.949,32,21.098,135.306
+1,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,1024,8,None,None,64,0,2048,1024,177.492,8,28.341,133.358
+2,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,1024,8,None,None,64,0,2048,1024,179.040,8,28.779,133.358
+3,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,1024,16,None,None,64,0,2048,1024,179.063,16,27.114,133.358
+4,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,1024,16,None,None,64,0,2048,1024,179.120,16,27.192,133.358
+5,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,1024,32,None,None,64,0,2048,1024,179.116,32,26.521,133.358
+6,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,1024,32,None,None,64,0,2048,1024,179.142,32,26.454,133.358
+7,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,2048,8,None,None,64,0,2048,2048,186.847,8,27.192,134.102
+8,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,2048,8,None,None,64,0,2048,2048,186.895,8,27.459,134.102
+9,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,2048,16,None,None,64,0,2048,2048,186.885,16,26.159,134.102
+10,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,2048,16,None,None,64,0,2048,2048,186.870,16,26.066,134.102
+11,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,2048,32,None,None,64,0,2048,2048,186.913,32,25.525,134.102
+12,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,2048,32,None,None,64,0,2048,2048,186.880,32,25.505,134.102
+13,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,4096,8,None,None,64,0,2048,4096,184.902,8,25.163,134.509
+14,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,4096,8,None,None,64,0,2048,4096,184.875,8,25.171,134.509
+15,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,4096,16,None,None,64,0,2048,4096,184.823,16,24.235,134.509
+16,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,4096,16,None,None,64,0,2048,4096,184.818,16,24.142,134.509
+17,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,4096,32,None,None,64,0,2048,4096,184.893,32,23.771,134.509
+18,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,4096,32,None,None,64,0,2048,4096,184.901,32,23.693,134.509
+19,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,8192,8,None,None,64,0,2048,8192,174.079,8,22.008,135.306
+20,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,8192,8,None,None,64,0,2048,8192,173.821,8,21.840,135.306
+21,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,8192,16,None,None,64,0,2048,8192,174.015,16,21.338,135.306
+22,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,8192,16,None,None,64,0,2048,8192,174.008,16,21.365,135.306
+23,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,8192,32,None,None,64,0,2048,8192,174.002,32,21.136,135.306
+24,mlx-community/Qwen3-235B-A22B-4bit-DWQ,m2ultra_192gb_76gpu,8192,32,None,None,64,0,2048,8192,173.949,32,21.098,135.306
