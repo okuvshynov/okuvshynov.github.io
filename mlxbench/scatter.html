@@ -238,6 +238,10 @@
                 <div id="prompt-chart"></div>
             </div>
             <div class="chart-wrapper">
+                <div class="chart-title">Prompt Processing Duration vs Prompt Tokens</div>
+                <div id="duration-chart"></div>
+            </div>
+            <div class="chart-wrapper">
                 <div class="chart-title">Generation TPS vs Prompt Tokens</div>
                 <div id="generation-chart"></div>
             </div>
@@ -294,6 +298,7 @@
             combinations.forEach(combo => visibleCombinations.add(combo));
             
             charts.prompt = createChart("#prompt-chart", width, height);
+            charts.duration = createChart("#duration-chart", width, height);
             charts.generation = createChart("#generation-chart", width, height);
             charts.memory = createChart("#memory-chart", width, height);
             
@@ -435,8 +440,119 @@
         
         function updateAllCharts() {
             updateChart(charts.prompt, 'prompt_tps', 'Prompt TPS');
+            updateDurationChart();
             updateChart(charts.generation, 'generation_tps', 'Generation TPS');
             updateChart(charts.memory, 'peak_memory_gb', 'Peak Memory (GB)');
+        }
+        
+        function updateDurationChart() {
+            const chart = charts.duration;
+            
+            // Filter data based on visible combinations and calculate duration
+            const data = filteredData.filter(d => 
+                visibleCombinations.has(`${d.model}|${d.hw_model}`)
+            ).map(d => ({
+                ...d,
+                duration: d.prompt_tokens / d.prompt_tps
+            }));
+            
+            // Handle empty data case
+            if (data.length === 0) {
+                chart.svg.selectAll(".dot").remove();
+                return;
+            }
+            
+            const xScale = d3.scaleLinear()
+                .domain(d3.extent(data, d => d.prompt_tokens))
+                .nice()
+                .range([0, chart.width]);
+            
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.duration)])
+                .nice()
+                .range([chart.height, 0]);
+            
+            // Update grid lines
+            chart.svg.select(".x-grid")
+                .transition()
+                .duration(750)
+                .call(d3.axisBottom(xScale)
+                    .tickSize(-chart.height)
+                    .tickFormat(""));
+            
+            chart.svg.select(".y-grid")
+                .transition()
+                .duration(750)
+                .call(d3.axisLeft(yScale)
+                    .tickSize(-chart.width)
+                    .tickFormat(""));
+            
+            chart.svg.select(".x-axis")
+                .transition()
+                .duration(750)
+                .call(d3.axisBottom(xScale));
+            
+            chart.svg.select(".y-axis")
+                .transition()
+                .duration(750)
+                .call(d3.axisLeft(yScale)
+                    .tickFormat(d => d.toFixed(2) + "s"));
+            
+            const yAxisLabel = chart.svg.selectAll(".y-axis-label").data([0]);
+            yAxisLabel.enter()
+                .append("text")
+                .attr("class", "axis-label y-axis-label")
+                .merge(yAxisLabel)
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left + 15)
+                .attr("x", 0 - (chart.height / 2))
+                .style("text-anchor", "middle")
+                .text("Prompt Processing Duration (seconds)");
+            
+            const circles = chart.svg.selectAll(".dot")
+                .data(data, d => `${d.model}-${d.hw_model}-${d.prompt_tokens}`);
+            
+            circles.exit()
+                .transition()
+                .duration(250)
+                .attr("r", 0)
+                .remove();
+            
+            const circlesEnter = circles.enter()
+                .append("circle")
+                .attr("class", "dot")
+                .attr("r", 5)
+                .style("fill", d => colorScale(`${d.model}|${d.hw_model}`))
+                .attr("cx", d => xScale(d.prompt_tokens))
+                .attr("cy", d => yScale(d.duration))
+                .style("opacity", 0);
+            
+            circlesEnter.merge(circles)
+                .on("mouseover", function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(`
+                        <strong>${d.model}</strong><br/>
+                        Hardware: ${d.hw_model}<br/>
+                        Prompt Tokens: ${d.prompt_tokens}<br/>
+                        Generation Tokens: ${d.generation_tokens}<br/>
+                        Prompt TPS: ${d.prompt_tps.toFixed(3)}<br/>
+                        Duration: ${d.duration.toFixed(3)}s
+                    `)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                })
+                .transition()
+                .duration(750)
+                .attr("cx", d => xScale(d.prompt_tokens))
+                .attr("cy", d => yScale(d.duration))
+                .style("opacity", 0.8);
         }
         
         function updateChart(chart, yField, yLabel) {
