@@ -97,6 +97,7 @@
         const charts = {};
         let visibleCombinations = new Set();
         let allCombinations = [];
+        let isRestoringFromURL = false;
         
         async function initializeApp() {
             const data = await loadAllCSVFiles();
@@ -109,6 +110,12 @@
             dimensions.hw_model = crossfilterData.dimension(d => d.hw_model);
             
             setupVisualization();
+            
+            // Restore filters from URL parameters if present
+            isRestoringFromURL = true;
+            parseURLParameters();
+            isRestoringFromURL = false;
+            
             applyFilters();
             updateAllCharts();
         }
@@ -242,6 +249,7 @@
             updateActiveFilters();
             updateResultsCount();
             updateColorLegend(allCombinations);
+            updateURLParameters();
         }
         
         function updateActiveFilters() {
@@ -264,6 +272,48 @@
         function updateResultsCount() {
             const count = filteredData.length;
             document.getElementById('results-count').textContent = `Showing ${count} rows`;
+        }
+        
+        function updateURLParameters() {
+            // Don't update URL if we're currently restoring from URL
+            if (isRestoringFromURL) return;
+            
+            const url = new URL(window.location);
+            url.searchParams.delete('filters'); // Clear existing filters
+            
+            // Encode filters as JSON
+            if (Object.keys(filters).some(key => filters[key].length > 0)) {
+                const filterData = {};
+                Object.entries(filters).forEach(([column, columnFilters]) => {
+                    if (columnFilters.length > 0) {
+                        filterData[column] = columnFilters;
+                    }
+                });
+                url.searchParams.set('filters', JSON.stringify(filterData));
+            }
+            
+            // Update URL without page reload
+            window.history.replaceState({}, '', url);
+        }
+        
+        function parseURLParameters() {
+            const url = new URL(window.location);
+            const filtersParam = url.searchParams.get('filters');
+            
+            if (filtersParam) {
+                try {
+                    const filterData = JSON.parse(filtersParam);
+                    Object.entries(filterData).forEach(([column, columnFilters]) => {
+                        if (filters[column]) {
+                            filters[column] = columnFilters;
+                        }
+                    });
+                    return true; // Indicates filters were restored
+                } catch (e) {
+                    console.warn('Failed to parse filters from URL:', e);
+                }
+            }
+            return false; // No filters to restore
         }
         
         function updateAllCharts() {
@@ -524,6 +574,18 @@
                 legendContainer.appendChild(item);
             });
         }
+        
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', () => {
+            // Reset filters and restore from URL
+            isRestoringFromURL = true;
+            filters.model = [];
+            filters.hw_model = [];
+            parseURLParameters();
+            isRestoringFromURL = false;
+            applyFilters();
+            updateAllCharts();
+        });
         
         initializeApp();
     </script>
