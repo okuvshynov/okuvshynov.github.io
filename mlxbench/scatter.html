@@ -150,6 +150,16 @@
             margin-right: 5px;
             border: 1px solid #333;
         }
+        
+        .grid line {
+            stroke: #ddd;
+            stroke-dasharray: 2,2;
+            opacity: 0.7;
+        }
+        
+        .grid path {
+            stroke-width: 0;
+        }
     </style>
 </head>
 <body>
@@ -271,6 +281,13 @@
                 .attr("transform", `translate(${margin.left},${margin.top})`);
             
             svg.append("g")
+                .attr("class", "grid x-grid")
+                .attr("transform", `translate(0,${chartHeight})`);
+            
+            svg.append("g")
+                .attr("class", "grid y-grid");
+            
+            svg.append("g")
                 .attr("class", "x-axis")
                 .attr("transform", `translate(0,${chartHeight})`);
             
@@ -381,6 +398,21 @@
                 .domain([0, d3.max(data, d => d[yField])])
                 .nice()
                 .range([chart.height, 0]);
+            
+            // Update grid lines
+            chart.svg.select(".x-grid")
+                .transition()
+                .duration(750)
+                .call(d3.axisBottom(xScale)
+                    .tickSize(-chart.height)
+                    .tickFormat(""));
+            
+            chart.svg.select(".y-grid")
+                .transition()
+                .duration(750)
+                .call(d3.axisLeft(yScale)
+                    .tickSize(-chart.width)
+                    .tickFormat(""));
             
             chart.svg.select(".x-axis")
                 .transition()
