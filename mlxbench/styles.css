@@ -25,3 +25,180 @@ h1 {
     margin-bottom: 20px;
     font-size: 14px;
 }
+
+/* Chart styles */
+.charts-container {
+    margin-top: 20px;
+}
+
+.chart-wrapper {
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.axis-label {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.dot {
+    stroke: #000;
+    stroke-width: 0.5;
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.dot:hover {
+    stroke-width: 2;
+    opacity: 1;
+}
+
+.tooltip {
+    position: absolute;
+    text-align: left;
+    padding: 10px;
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.legend {
+    font-size: 12px;
+}
+
+.legend-item {
+    margin-bottom: 5px;
+}
+
+/* Filter styles */
+.filter-container {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.filter-group {
+    display: inline-block;
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.filter-group select,
+.filter-group input {
+    margin-right: 5px;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.filter-group input[list] {
+    width: 200px;
+}
+
+.filter-group button {
+    padding: 4px 8px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.filter-group button:hover {
+    background-color: #45a049;
+}
+
+.active-filter {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 4px;
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.active-filter .remove {
+    margin-left: 5px;
+    cursor: pointer;
+    color: #f44336;
+    font-weight: bold;
+}
+
+/* Color legend styles */
+.color-legend {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.color-legend-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.color-legend-items {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.color-legend-item {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.color-legend-item:hover {
+    background-color: #f0f0f0;
+}
+
+.color-legend-item.inactive {
+    opacity: 0.3;
+}
+
+.color-legend-item.inactive .color-box {
+    background-color: #ccc !important;
+}
+
+.color-box {
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    border: 1px solid #333;
+}
+
+/* Grid styles */
+.grid line {
+    stroke: #ddd;
+    stroke-dasharray: 2,2;
+    opacity: 0.7;
+}
+
+.grid path {
+    stroke-width: 0;
+}
