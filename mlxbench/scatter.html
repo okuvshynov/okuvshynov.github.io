@@ -142,6 +142,23 @@
             margin-right: 20px;
             margin-bottom: 5px;
             font-size: 12px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .color-legend-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .color-legend-item.inactive {
+            opacity: 0.3;
+        }
+        
+        .color-legend-item.inactive .color-box {
+            background-color: #ccc !important;
         }
         
         .color-box {
@@ -172,6 +189,12 @@
             <br>• Colors represent different Model/Hardware combinations
             <br>• Hover over points to see details
             <br>• Use filters to focus on specific models or hardware
+            <br>• Click legend items to show/hide specific combinations
+        </div>
+        
+        <div class="color-legend" id="color-legend">
+            <div class="color-legend-title">Model/Hardware Combinations (click to toggle)</div>
+            <div class="color-legend-items" id="color-legend-items"></div>
         </div>
         
         <div class="filter-container">
@@ -217,11 +240,6 @@
                 <div id="memory-chart"></div>
             </div>
         </div>
-        
-        <div class="color-legend" id="color-legend">
-            <div class="color-legend-title">Model/Hardware Combinations</div>
-            <div class="color-legend-items" id="color-legend-items"></div>
-        </div>
     </div>
     
     <script>
@@ -241,6 +259,7 @@
         let colorScale;
         let tooltip;
         const charts = {};
+        let visibleCombinations = new Set();
         
         async function initializeApp() {
             const data = await loadAllCSVFiles();
@@ -264,6 +283,9 @@
             const combinations = [...new Set(currentData.map(d => `${d.model}|${d.hw_model}`))];
             colorScale = d3.scaleOrdinal(d3.schemeCategory10)
                 .domain(combinations);
+            
+            // Initialize all combinations as visible
+            combinations.forEach(combo => visibleCombinations.add(combo));
             
             charts.prompt = createChart("#prompt-chart", width, height);
             charts.generation = createChart("#generation-chart", width, height);
@@ -387,7 +409,16 @@
         }
         
         function updateChart(chart, yField, yLabel) {
-            const data = filteredData;
+            // Filter data based on visible combinations
+            const data = filteredData.filter(d => 
+                visibleCombinations.has(`${d.model}|${d.hw_model}`)
+            );
+            
+            // Handle empty data case
+            if (data.length === 0) {
+                chart.svg.selectAll(".dot").remove();
+                return;
+            }
             
             const xScale = d3.scaleLinear()
                 .domain(d3.extent(data, d => d.prompt_tokens))
@@ -488,10 +519,25 @@
                 const [model, hardware] = combo.split('|');
                 const item = document.createElement('div');
                 item.className = 'color-legend-item';
+                if (!visibleCombinations.has(combo)) {
+                    item.classList.add('inactive');
+                }
                 item.innerHTML = `
                     <div class="color-box" style="background-color: ${colorScale(combo)}"></div>
                     <span>${model} / ${hardware}</span>
                 `;
+                
+                item.addEventListener('click', () => {
+                    if (visibleCombinations.has(combo)) {
+                        visibleCombinations.delete(combo);
+                        item.classList.add('inactive');
+                    } else {
+                        visibleCombinations.add(combo);
+                        item.classList.remove('inactive');
+                    }
+                    updateAllCharts();
+                });
+                
                 legendContainer.appendChild(item);
             });
         }
