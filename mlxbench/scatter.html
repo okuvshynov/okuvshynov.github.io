@@ -89,6 +89,10 @@
             border-radius: 3px;
         }
         
+        .filter-group input[list] {
+            width: 200px;
+        }
+        
         .filter-group button {
             padding: 4px 8px;
             background-color: #4CAF50;
@@ -206,7 +210,8 @@
                     <option value="contains">contains</option>
                     <option value="!contains">!contains</option>
                 </select>
-                <input type="text" id="model-value" placeholder="Enter model name">
+                <input type="text" id="model-value" placeholder="Enter model name" list="model-list">
+                <datalist id="model-list"></datalist>
                 <button onclick="addFilter('model')">Add Filter</button>
             </div>
             
@@ -218,7 +223,8 @@
                     <option value="contains">contains</option>
                     <option value="!contains">!contains</option>
                 </select>
-                <input type="text" id="hw_model-value" placeholder="Enter hardware name">
+                <input type="text" id="hw_model-value" placeholder="Enter hardware name" list="hw_model-list">
+                <datalist id="hw_model-list"></datalist>
                 <button onclick="addFilter('hw_model')">Add Filter</button>
             </div>
         </div>
@@ -292,6 +298,31 @@
             charts.memory = createChart("#memory-chart", width, height);
             
             updateColorLegend(combinations);
+            populateDataLists();
+        }
+        
+        function populateDataLists() {
+            // Get unique values for each field
+            const uniqueModels = [...new Set(currentData.map(d => d.model))].sort();
+            const uniqueHardware = [...new Set(currentData.map(d => d.hw_model))].sort();
+            
+            // Populate model datalist
+            const modelDatalist = document.getElementById('model-list');
+            modelDatalist.innerHTML = '';
+            uniqueModels.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                modelDatalist.appendChild(option);
+            });
+            
+            // Populate hardware datalist
+            const hwDatalist = document.getElementById('hw_model-list');
+            hwDatalist.innerHTML = '';
+            uniqueHardware.forEach(hw => {
+                const option = document.createElement('option');
+                option.value = hw;
+                hwDatalist.appendChild(option);
+            });
         }
         
         function createChart(selector, chartWidth, chartHeight) {
