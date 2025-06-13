@@ -96,6 +96,7 @@
         let tooltip;
         const charts = {};
         let visibleCombinations = new Set();
+        let allCombinations = [];
         
         async function initializeApp() {
             const data = await loadAllCSVFiles();
@@ -116,19 +117,19 @@
             tooltip = d3.select("body").append("div")
                 .attr("class", "tooltip");
             
-            const combinations = [...new Set(currentData.map(d => `${d.model}|${d.hw_model}`))];
+            allCombinations = [...new Set(currentData.map(d => `${d.model}|${d.hw_model}`))];
             colorScale = d3.scaleOrdinal(d3.schemeCategory10)
-                .domain(combinations);
+                .domain(allCombinations);
             
             // Initialize all combinations as visible
-            combinations.forEach(combo => visibleCombinations.add(combo));
+            allCombinations.forEach(combo => visibleCombinations.add(combo));
             
             charts.prompt = createChart("#prompt-chart", width, height);
             charts.duration = createChart("#duration-chart", width, height);
             charts.generation = createChart("#generation-chart", width, height);
             charts.memory = createChart("#memory-chart", width, height);
             
-            updateColorLegend(combinations);
+            updateColorLegend(allCombinations);
             populateDataLists();
         }
         
@@ -240,6 +241,7 @@
             
             updateActiveFilters();
             updateResultsCount();
+            updateColorLegend(allCombinations);
         }
         
         function updateActiveFilters() {
@@ -484,11 +486,19 @@
                 .style("opacity", 0.8);
         }
         
-        function updateColorLegend(combinations) {
+        function updateColorLegend(allCombinations) {
             const legendContainer = document.getElementById('color-legend-items');
             legendContainer.innerHTML = '';
             
-            combinations.forEach(combo => {
+            // Get combinations present in filtered data
+            const filteredCombinations = new Set(filteredData.map(d => `${d.model}|${d.hw_model}`));
+            
+            allCombinations.forEach(combo => {
+                // Only show legend items that have data points in filtered data
+                if (!filteredCombinations.has(combo)) {
+                    return; // Skip this combination
+                }
+                
                 const [model, hardware] = combo.split('|');
                 const item = document.createElement('div');
                 item.className = 'color-legend-item';
