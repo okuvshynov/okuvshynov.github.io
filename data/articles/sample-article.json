@@ -1,0 +1,27 @@
+{
+  "charts": {
+    "performance-over-time": {
+      "type": "line",
+      "data": {
+        "labels": ["Jan", "Feb", "Mar", "Apr"],
+        "datasets": [{
+          "label": "Throughput",
+          "data": [10, 25, 18, 32]
+        }]
+      }
+    },
+    "comparison": {
+      "type": "bar",
+      "data": {
+        "labels": ["A", "B", "C"],
+        "datasets": [{
+          "label": "Score",
+          "data": [42, 67, 55]
+        }]
+      },
+      "options": {
+        "indexAxis": "y"
+      }
+    }
+  }
+}
