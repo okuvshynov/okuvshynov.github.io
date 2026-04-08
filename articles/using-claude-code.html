@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Using Claude Code, April 2026</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h1 id="using-claude-code-april-2026">Using Claude Code, April
+    2026</h1>
+    <p>AI-assisted coding evolves so fast that I’m starting to forget
+    how it looked 6 months ago. I’ll try to make these writeups ~monthly
+    to be able to go back and appreciate the progress.</p>
+    <p>The concrete project here is a <a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/kv-transfer">KV-cache
+    transfer experiment</a> for locally-running language models. You can
+    find the results in <a
+    href="https://okuvshynov.github.io/articles/kv-cache-transfer.html">part
+    1</a> and <a
+    href="https://okuvshynov.github.io/articles/kv-cache-transfer-gemma4.html">part
+    2 (Gemma 4)</a>.</p>
+    <h3 id="setup">Setup</h3>
+    <ol type="1">
+    <li>Claude Code Max subscription with 1M context window, Opus
+    4.6;</li>
+    <li>GitHub repo with my code - a collection of independent but
+    conceptually connected experiments that share similar structure and
+    build commands;</li>
+    <li>local <a
+    href="https://github.com/ggml-org/llama.cpp/tree/master">llama.cpp</a>
+    checkout, added via <code>/add-dir</code> - used as a library, not
+    modified, but Claude needs access to the source to understand the
+    API.</li>
+    </ol>
+    <h3 id="overall-approach">Overall approach</h3>
+    <p>It is very tempting to just let it run and do everything
+    end-to-end, yet I’m still not comfortable shipping code I’ve never
+    read. At the same time, for experimental projects like this one,
+    thorough review at every step is a waste of time. For ‘large
+    features’, like the very first version of the experiment, I split
+    the work into two phases.</p>
+    <p><strong>Phase 1: iterate.</strong> Create a branch
+    (<code>foo</code>), let Claude Code run without reviewing the code,
+    test the outcome, iterate until results make sense. A lot of code
+    gets removed or rewritten - for example, I went through multiple
+    iterations on chart generation before the visualizations looked
+    clear. Reviewing code at this stage would be wasted effort since
+    most of it gets thrown out.</p>
+    <p><strong>Phase 2: review.</strong> Once the feature works, create
+    a second branch (<code>foo-rc</code>) and ask Claude Code to look at
+    the diff between <code>main</code>, <code>foo</code>, and
+    <code>foo-rc</code>. It splits the work into small, reviewable pull
+    requests merged to <code>foo-rc</code> (not <code>main</code>). I
+    review each PR and let Claude fix issues. After everything is
+    merged, test <code>foo-rc</code> again and merge to
+    <code>main</code>. One issue here: Claude Code tended to create
+    changes that were too large. I’ll need to iterate on prompting to
+    get more review-friendly splits.</p>
+    <p>For smaller, targeted changes I tend to review it locally, not
+    going through pull requests.</p>
+    <p>I never ran out of the 1M context window - I don’t think I ever
+    went below 500k remaining.</p>
+    <p>I don’t use any complex setup beyond <a
+    href="https://github.com/okuvshynov/dotfiles/tree/main/claude/commands">several
+    custom commands</a>:</p>
+    <ol type="1">
+    <li><code>/commit</code> – the most used one. It writes detailed
+    commit messages and checks that documentation is up to date. I
+    commit very often - more than I would manually. AI assistance makes
+    writing detailed commit messages nearly instant, they become the
+    major source of context for future turns. This also helps with what
+    some form of ‘code state invariant’: we should be able to continue
+    working effectively if entire conversation/context is lost and only
+    version control/working copy remains;</li>
+    <li><code>/up2speed</code> – read docs and recent commits to rebuild
+    context. Useful when switching branches or after a restart. Less
+    important with the 1M context window.</li>
+    <li><code>/oops &lt;here's something that went wrong&gt;</code> –
+    record that something went wrong and update CLAUDE.md so it doesn’t
+    happen again. For example, Claude would repeatedly look for model
+    files in the wrong place or use Python outside the virtual
+    environment.</li>
+    <li><code>/hk</code> – housekeeping. Check that documents, plans,
+    and comments are consistent with the changes we made.</li>
+    </ol>
+    <h3 id="problems-encountered">Problems encountered</h3>
+    <ol type="1">
+    <li><strong>Major logic error.</strong> Despite being instructed,
+    Claude computed KL-divergence over everything including the input
+    prompt, giving too-good-to-be-true results for handoff. I caught it
+    by looking at the result data and the size of saved logit files -
+    not by reviewing the generated code (<a
+    href="https://github.com/okuvshynov/llama-sandbox/commit/0a64586afcb4f58229a94d912c6b4aee25867341">fix</a>).</li>
+    <li><strong>Remote workflow.</strong> I could not figure out a good,
+    intuitive, automated setup for “make changes, deploy to remote
+    workstation, test there.”</li>
+    <li><strong>Inefficient code.</strong> Since we replay an existing
+    token sequence (not generate new tokens), logits can be evaluated in
+    large batches. Claude Code didn’t figure this out for the handoff
+    scenario, making evaluation slow (<a
+    href="https://github.com/okuvshynov/llama-sandbox/commit/104c94714dda88ffc149690f1ec9883c9104a053">fix</a>).</li>
+    <li><strong>Skipping instructions.</strong> Despite explicit
+    instructions in <code>/commit</code>, Claude Code would often skip
+    the documentation update step, resulting in docs getting out of date
+    (<a
+    href="https://github.com/okuvshynov/llama-sandbox/commit/190682e32df9c2fa9ce88d54c940a53ac4ca4301">example</a>).</li>
+    </ol>
+  </main>
+
+
+  <script src="/assets/js/chart.min.js"></script>
+  <script src="/assets/js/charts.js"></script>
+</body>
+</html>
