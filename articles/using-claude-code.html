@@ -56,9 +56,12 @@
     requests merged to <code>foo-rc</code> (not <code>main</code>). I
     review each PR and let Claude fix issues. After everything is
     merged, test <code>foo-rc</code> again and merge to
-    <code>main</code>. One issue here: Claude Code tended to create
-    changes that were too large. I’ll need to iterate on prompting to
-    get more review-friendly splits.</p>
+    <code>main</code> (<a
+    href="https://github.com/okuvshynov/llama-sandbox/pull/8">example</a>).
+    One issue here: Claude Code tended to create changes that were too
+    large. I’ll need to iterate on prompting to get more review-friendly
+    splits.</p>
+    <p><img src="/assets/images/using-claude-code/workflow.png" alt="Two-phase branching workflow: iterate on foo, then review via PRs into foo-rc before merging to main"></p>
     <p>For smaller, targeted changes I tend to review it locally, not
     going through pull requests.</p>
     <p>I never ran out of the 1M context window - I don’t think I ever
