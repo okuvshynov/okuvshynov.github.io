@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validator Bench</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h1 id="validator-bench">Validator bench</h1>
+    <p>The motivation was to create a software-engineering related
+    benchmark which would produce a numeric, quantitative score for each
+    attempt, rather than a binary pass/fail signal. This way we should
+    be able to get more information out of each run.</p>
+    <p>The specific task is to create a validator for TOML 1.0. TOML has
+    a <a href="https://github.com/toml-lang/toml-test">rich set of
+    tests</a> and we can score models according to the number of tests
+    passed. TOML is most definitely known to the models, yet
+    implementing the entire specification correctly for a given TOML
+    version is still non-trivial for many models. In addition, we can
+    also test asking to implement the validator without providing the
+    specification and thus decouple model knowledge and ability to
+    interpret specification and follow directions.</p>
+    <p>The model is instructed to use the <code>submit()</code> tool to
+    generate the entire code for a validator. The harness compiles the
+    code, runs the submitted validator against the test set and returns
+    the compiler output and/or names of failed tests, if any. This gives
+    the model partial information on what to fix on the next turn - no
+    complete test cases, but a hint of what to improve. Models must use
+    c++ and the exact build command <code>clang++ -std=c++17 -O2</code>
+    is shared with the model in the prompt.</p>
+    <p>The model gets up to 5 turns per attempt.</p>
+    <p>The benchmark is intended to test the model, not model + some
+    coding agent combination. The ‘agent’ we have here is rudimentary,
+    the only tool is <code>submit</code>.</p>
+    <p>The expectations are different for different classes of
+    models:</p>
+    <ol type="1">
+    <li>For frontier models, like <a
+    href="https://openai.com/index/introducing-gpt-5-3-codex/">GPT-5.3-codex</a>
+    or Opus 4.6-<a
+    href="https://www.anthropic.com/news/claude-opus-4-7">4.7</a> I’d
+    expect them to solve it perfectly or close to that, both in ‘spec
+    provided’ and ‘no spec provided’ variants. It will serve as a sanity
+    check for a benchmark, rather than a differentiator between frontier
+    models, so I planned to run it for just 3 attempts each.</li>
+    <li>The second tier was Sonnet 4.6, Sonnet 4.5 (September 2025), <a
+    href="https://z.ai/blog/glm-5.1">GLM 5.1</a> and <a
+    href="https://huggingface.co/moonshotai/Kimi-K2.5">Kimi K2.5</a>.
+    GLM 5.1 and Kimi K2.5 are the first open-weight models which felt
+    close to ‘frontier several months ago’, while still not quite on
+    modern Opus level. I expected these models to do well, but not
+    perfect. I decided to run 15 attempts; I also included Qwen 3.6 Plus
+    in this category.</li>
+    <li>The third tier was strong open-weight models which are practical
+    to run locally. Here I was interested in different quantization
+    level performance, and focused on larger members of the Qwen 3.5
+    family - 397B and 122B MoE models. I decided to run 20 attempts each
+    only for ‘spec’ variants; the expectation here was that I should be
+    able to notice the difference between quant levels, thus more
+    runs.</li>
+    </ol>
+    <p>Inference providers used:</p>
+    <ol type="1">
+    <li>OpenAI for GPT-codex</li>
+    <li>Anthropic for Opus/Sonnet</li>
+    <li><a href="https://app.fireworks.ai/models">Fireworks</a> for <a
+    href="https://fireworks.ai/models/fireworks/glm-5p1">GLM 5.1</a>, <a
+    href="https://fireworks.ai/models/fireworks/kimi-k2p5">Kimi K2.5</a>
+    and <a
+    href="https://fireworks.ai/models/fireworks/qwen3p6-plus">Qwen 3.6
+    Plus</a></li>
+    <li>Local <a href="https://github.com/ggml-org/llama.cpp">llama.cpp
+    build</a> for Qwen 3.5 quantized models (<a
+    href="https://huggingface.co/unsloth/Qwen3.5-122B-A10B-GGUF">122B-A10B
+    GGUF</a> and <a
+    href="https://huggingface.co/unsloth/Qwen3.5-397B-A17B-GGUF">397B-A17B
+    GGUF</a>)</li>
+    </ol>
+    <p>As we ask models to create a validator which returns true/false,
+    we are creating a binary classifier. This means, if we just count
+    the number of tests passed, the trivial baseline ‘always return
+    true’ or ‘always return false’ would get pretty decent results.
+    Instead of using test pass rate, I use <a
+    href="https://en.wikipedia.org/wiki/Phi_coefficient">MCC</a>. It is
+    computed from the confusion matrix as</p>
+    <pre><code>mcc = (tp * tn - fp * fn) / sqrt((tp + fp)(tp + fn)(tn + fp)(tn + fn))</code></pre>
+    <p>The perfect classifier would score 1, the ‘perfectly wrong’ -1,
+    and 0 is ‘as good as random’.</p>
+    <p>Here are the results for ‘best of 5 turns’ for a ‘toml
+    specification provided’:</p>
+    <p><img width="1500" height="877" alt="toml-1.0-cpp" src="/assets/images/validator-bench/toml-1.0-cpp.png" /></p>
+    <p>Observations:</p>
+    <ol type="1">
+    <li>Frontier models do indeed solve it, with GPT-5.3-codex-high and
+    Opus 4.7 consistently getting perfect scores, so benchmark passes
+    sanity check;</li>
+    <li>GLM 5.1 is very close to Sonnet 4.6 and considerably stronger
+    than Sonnet 4.5, released 2025-09;</li>
+    <li>Kimi K2.5 is very close to Sonnet 4.5</li>
+    <li>Larger model, more aggressive quant vs smaller model, less
+    aggressive quant: <a
+    href="https://huggingface.co/unsloth/Qwen3.5-397B-A17B-GGUF/tree/main/UD-IQ1_M">Qwen
+    397B @ IQ1</a>, 107GB is stronger than <a
+    href="https://huggingface.co/unsloth/Qwen3.5-122B-A10B-GGUF/tree/main/UD-Q6_K_XL">Qwen
+    3.5 122B @ Q6</a>, 112GB.</li>
+    <li>For Qwen 3.5 122B there’s no strong difference between Q6 &amp;
+    Q3, but IQ1 quality drops sharply</li>
+    <li>Qwen 3.6 Plus, which is <a
+    href="https://qwen.ai/blog?id=qwen3.6">slightly better than 3.5-397B
+    on self-reported results</a>, scores slightly better than the IQ1
+    quant of the 397B version;</li>
+    </ol>
+    <p>Now let’s take a look at how the score changes for the ‘no
+    specification provided’ case. I only ran it for the stronger
+    models.</p>
+    <p><img width="1500" height="600" alt="toml-1.0-cpp vs toml-1.0-cpp-nospec" src="/assets/images/validator-bench/toml-1.0-cpp_vs_toml-1.0-cpp-nospec.png" /></p>
+    <p>Top models are still doing great, they have enough knowledge
+    and/or reasoning ability to recover from partial mistakes on early
+    turns to get close to perfect scores.</p>
+    <p>Sonnet 4.6 sees a small drop, while GLM 5.1, Sonnet 4.5 and Kimi
+    K2.5 see fairly substantial ones.</p>
+    <p>Interestingly, GPT-Codex often gets compile errors on the first
+    few tries - it consistently tries to include non-standard
+    <code>bits/stdc++.h</code> header, despite being provided with the
+    exact build command we are going to use. I suspect this is coming
+    from some programming-competition related training data. Visualizing
+    progress by ‘turn’ is something I plan to do next.</p>
+    <p>Let’s take a look at the latency, with focus on models from the
+    same provider - Fireworks.</p>
+    <p><img width="1500" height="300" alt="timing-fireworks-toml-1.0-cpp" src="/assets/images/validator-bench/timing-fireworks-toml-1.0-cpp.png" /></p>
+    <p>As we can see, GLM 5.1 is much slower compared to Kimi K2.5 and
+    Qwen 3.6 Plus. I don’t have the exact token information saved, but
+    it was coming from both slower time per token and more thinking
+    tokens.</p>
+    <h3 id="next-steps">Next steps</h3>
+    <ul>
+    <li>Create a more challenging version of the benchmark which would
+    be useful to differentiate between frontier models;</li>
+    <li>Run on more quantized versions of existing mid-tier models;</li>
+    <li>Run on new models are they are released - Kimi K2.6 seems to be
+    released right now;</li>
+    </ul>
+    <h3 id="references">References:</h3>
+    <ul>
+    <li><a href="https://qwen.ai/blog?id=qwen3.6">Qwen 3.6
+    announcement</a></li>
+    <li><a href="https://z.ai/blog/glm-5.1">GLM 5.1
+    announcement</a></li>
+    <li><a href="https://www.anthropic.com/news/claude-opus-4-7">Claude
+    Opus 4.7 announcement</a></li>
+    <li><a
+    href="https://openai.com/index/introducing-gpt-5-3-codex/">GPT-5.3-codex
+    announcement</a></li>
+    <li><a href="https://fireworks.ai/models/fireworks/glm-5p1">GLM 5.1
+    on Fireworks</a></li>
+    <li><a
+    href="https://fireworks.ai/models/fireworks/qwen3p6-plus">Qwen 3.6
+    Plus on Fireworks</a></li>
+    <li><a href="https://fireworks.ai/models/fireworks/kimi-k2p5">Kimi
+    K2.5 on Fireworks</a></li>
+    <li><a href="https://huggingface.co/moonshotai/Kimi-K2.5">Kimi K2.5
+    on Hugging Face</a></li>
+    <li><a
+    href="https://huggingface.co/unsloth/Qwen3.5-122B-A10B-GGUF">Unsloth
+    Qwen 3.5 122B-A10B GGUF</a></li>
+    <li><a
+    href="https://huggingface.co/unsloth/Qwen3.5-397B-A17B-GGUF">Unsloth
+    Qwen 3.5 397B-A17B GGUF</a></li>
+    </ul>
+  </main>
+
+
+  <script src="/assets/js/chart.min.js"></script>
+  <script src="/assets/js/charts.js"></script>
+</body>
+</html>
