@@ -24,13 +24,15 @@
     specification and thus decouple model knowledge and ability to
     interpret specification and follow directions.</p>
     <p>The model is instructed to use the <code>submit()</code> tool to
-    generate the entire code for a validator. The harness compiles the
-    code, runs the submitted validator against the test set and returns
-    the compiler output and/or names of failed tests, if any. This gives
-    the model partial information on what to fix on the next turn - no
-    complete test cases, but a hint of what to improve. Models must use
-    c++ and the exact build command <code>clang++ -std=c++17 -O2</code>
-    is shared with the model in the prompt.</p>
+    generate the entire code for a validator. The <a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench">harness</a>
+    compiles the code, runs the submitted validator against the test set
+    and returns the compiler output and/or names of failed tests, if
+    any. This gives the model partial information on what to fix on the
+    next turn - no complete test cases, but a hint of what to improve.
+    Models must use c++ and the exact build command
+    <code>clang++ -std=c++17 -O2</code> is shared with the model in the
+    prompt.</p>
     <p>The model gets up to 5 turns per attempt.</p>
     <p>The benchmark is intended to test the model, not model + some
     coding agent combination. The ‘agent’ we have here is rudimentary,
@@ -145,6 +147,9 @@
     </ul>
     <h3 id="references">References:</h3>
     <ul>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench">Benchmark
+    source code (llama-sandbox/validation-bench)</a></li>
     <li><a href="https://qwen.ai/blog?id=qwen3.6">Qwen 3.6
     announcement</a></li>
     <li><a href="https://z.ai/blog/glm-5.1">GLM 5.1
