@@ -128,8 +128,7 @@
     few tries - it consistently tries to include non-standard
     <code>bits/stdc++.h</code> header, despite being provided with the
     exact build command we are going to use. I suspect this is coming
-    from some programming-competition related training data. Visualizing
-    progress by ‘turn’ is something I plan to do next.</p>
+    from some programming-competition related training data.</p>
     <p>Let’s take a look at the latency, with focus on models from the
     same provider - Fireworks.</p>
     <p><img width="1500" height="300" alt="timing-fireworks-toml-1.0-cpp" src="/assets/images/validator-bench/timing-fireworks-toml-1.0-cpp.png" /></p>
@@ -139,11 +138,16 @@
     tokens.</p>
     <h3 id="next-steps">Next steps</h3>
     <ul>
+    <li>Visualizing by-turn improvement</li>
     <li>Create a more challenging version of the benchmark which would
     be useful to differentiate between frontier models;</li>
     <li>Run on more quantized versions of existing mid-tier models;</li>
     <li>Run on new models are they are released - Kimi K2.6 seems to be
     released right now;</li>
+    <li>Run with <a
+    href="https://okuvshynov.github.io/articles/kv-cache-transfer.html">KV-cache
+    transfer</a> for models where we see the impact of quantization,
+    like Qwen 122B</li>
     </ul>
     <h3 id="references">References:</h3>
     <ul>
