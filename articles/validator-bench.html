@@ -10,10 +10,14 @@
   <main>
     <p><a href="/">← home</a></p>
     <h1 id="validator-bench">Validator bench</h1>
-    <p>The motivation was to create a software-engineering related
-    benchmark which would produce a numeric, quantitative score for each
-    attempt, rather than a binary pass/fail signal. This way we should
-    be able to get more information out of each run.</p>
+    <p>The motivation for this work was to create a software-engineering
+    related benchmark which would produce a numeric, quantitative score
+    for each attempt, rather than a binary pass/fail signal - this way
+    we should be able to get more information out of each run. The plan
+    at this point is to validate the benchmark itself and check that it
+    produces results which ‘make sense’. After that we can cheaply scale
+    and apply it to evaluate impact from smaller-scale changes to models
+    - quantization of weights, kv cache, sampling, etc.</p>
     <p>The specific task is to create a validator for TOML 1.0. TOML has
     a <a href="https://github.com/toml-lang/toml-test">rich set of
     tests</a> and we can score models according to the number of tests
@@ -32,8 +36,7 @@
     next turn - no complete test cases, but a hint of what to improve.
     Models must use c++ and the exact build command
     <code>clang++ -std=c++17 -O2</code> is shared with the model in the
-    prompt.</p>
-    <p>The model gets up to 5 turns per attempt.</p>
+    prompt. The model gets up to 5 turns per attempt.</p>
     <p>The benchmark is intended to test the model, not model + some
     coding agent combination. The ‘agent’ we have here is rudimentary,
     the only tool is <code>submit</code>.</p>
@@ -42,20 +45,26 @@
     <ol type="1">
     <li>For frontier models, like <a
     href="https://openai.com/index/introducing-gpt-5-3-codex/">GPT-5.3-codex</a>
-    or Opus 4.6-<a
+    or Opus <a
+    href="https://www.anthropic.com/news/claude-opus-4-6">4.6</a>-<a
     href="https://www.anthropic.com/news/claude-opus-4-7">4.7</a> I’d
     expect them to solve it perfectly or close to that, both in ‘spec
     provided’ and ‘no spec provided’ variants. It will serve as a sanity
     check for a benchmark, rather than a differentiator between frontier
     models, so I planned to run it for just 3 attempts each.</li>
-    <li>The second tier was Sonnet 4.6, Sonnet 4.5 (September 2025), <a
-    href="https://z.ai/blog/glm-5.1">GLM 5.1</a> and <a
+    <li>The second tier was <a
+    href="https://www.anthropic.com/news/claude-sonnet-4-6">Sonnet
+    4.6</a>, <a
+    href="https://www.anthropic.com/news/claude-sonnet-4-5">Sonnet 4.5
+    (September 2025)</a> , <a href="https://z.ai/blog/glm-5.1">GLM
+    5.1</a> and <a
     href="https://huggingface.co/moonshotai/Kimi-K2.5">Kimi K2.5</a>.
     GLM 5.1 and Kimi K2.5 are the first open-weight models which felt
     close to ‘frontier several months ago’, while still not quite on
     modern Opus level. I expected these models to do well, but not
     perfect. I decided to run 15 attempts; I also included Qwen 3.6 Plus
-    in this category.</li>
+    in this category, even though I have no experience with this
+    model.</li>
     <li>The third tier was strong open-weight models which are practical
     to run locally. Here I was interested in different quantization
     level performance, and focused on larger members of the Qwen 3.5
@@ -114,6 +123,8 @@
     href="https://qwen.ai/blog?id=qwen3.6">slightly better than 3.5-397B
     on self-reported results</a>, scores slightly better than the IQ1
     quant of the 397B version;</li>
+    <li>The range with the ‘recommended’ temperature settings is pretty
+    wide;</li>
     </ol>
     <p>Now let’s take a look at how the score changes for the ‘no
     specification provided’ case. I only ran it for the stronger
@@ -125,12 +136,12 @@
     <p>Sonnet 4.6 sees a small drop, while GLM 5.1, Sonnet 4.5 and Kimi
     K2.5 see fairly substantial ones.</p>
     <p>Interestingly, GPT-Codex often gets compile errors on the first
-    few tries - it consistently tries to include non-standard
-    <code>bits/stdc++.h</code> header, despite being provided with the
-    exact build command we are going to use. I suspect this is coming
-    from some programming-competition related training data.</p>
-    <p>Let’s take a look at the latency, with focus on models from the
-    same provider - Fireworks.</p>
+    few turns - it consistently tries to include non-standard
+    <code>&lt;bits/stdc++.h&gt;</code> header, despite being provided
+    with the exact build command we are going to use. I suspect this is
+    coming from some competitive programming training data.</p>
+    <p>Let’s also take a look at the latency, with focus on models from
+    the same provider - Fireworks.</p>
     <p><img width="1500" height="300" alt="timing-fireworks-toml-1.0-cpp" src="/assets/images/validator-bench/timing-fireworks-toml-1.0-cpp.png" /></p>
     <p>As we can see, GLM 5.1 is much slower compared to Kimi K2.5 and
     Qwen 3.6 Plus. I don’t have the exact token information saved, but
@@ -140,8 +151,14 @@
     <ul>
     <li>Visualizing by-turn improvement</li>
     <li>Create a more challenging version of the benchmark which would
-    be useful to differentiate between frontier models;</li>
-    <li>Run on more quantized versions of existing mid-tier models;</li>
+    be useful to differentiate between frontier models; One
+    straightforward way might be to use much more obscure programming
+    languages, potentially supplying language specification in the
+    prompt;</li>
+    <li>Create more tasks for different formats; This way we can easily
+    get more data for |tasks| x |language|.</li>
+    <li>Run on more quantized versions of existing mid-tier models - for
+    example, where exactly a drop in Qwen 3.5-122 score happens?</li>
     <li>Run on new models are they are released - Kimi K2.6 seems to be
     released right now;</li>
     <li>Run with <a
