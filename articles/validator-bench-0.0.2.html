@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validator Bench 0.0.2</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h1 id="validator-bench-0.0.2">Validator Bench 0.0.2</h1>
+    <p>This is a small update for <a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">Validator
+    Bench</a>.</p>
+    <p>The task stays the same, create a validator for TOML 1.0 using
+    c++17. The motivation for now is to get it into stable condition for
+    this one task, and then quickly scale to many more tasks with the
+    same basic property - providing real value score rather than binary
+    pass/fail to gain more information per sample, thus being more
+    efficient in estimating model ability.</p>
+    <p>One change is for the benchmark <a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench">harness</a>
+    itself - separate runners for different model providers, as there
+    are different settings which make litellm-based harness way
+    overloaded and bug-prone.</p>
+    <p>Other changes involve running for newly released models.</p>
+    <p>Here’s the overall summary for the results. Note that there are
+    multiple entries for models like Opus 4.7 - the old one from
+    deprecated litellm-based runner and new ones from dedicated
+    Anthropic SDK runner with correct thinking budget setting. In the
+    next run, we’ll clean up old results. Some runs are still in
+    progress and will be updated for completeness, yet I do not expect
+    the results for this task to change significantly.</p>
+    <p>In the chart below, color coding distinguishes open-weight from
+    proprietary models, and model names in bold are the ones newly added
+    in this update.</p>
+    <p><img width="1500" height="1687" alt="toml-1.0-cpp" src="/assets/images/validator-bench-0.0.2/toml-1.0-cpp.png" /></p>
+    <p>Observations:</p>
+    <ul>
+    <li>Running Opus 4.7 with official Anthropic SDK and <a
+    href="https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking">adaptive
+    thinking</a> results in it completing the task with perfect score on
+    first turn; No other model did that - gpt-5.3-codex with high
+    thinking got to perfect score after several turns;</li>
+    <li>Sonnet 4.6 with thinking budget of 30000 bumps its score as
+    well;</li>
+    <li><a href="https://www.kimi.com/blog/kimi-k2-6">Kimi K2.6</a> is
+    extremely good when it actually submits something, it is the only
+    open-weight model which got a perfect score on at least one attempt.
+    However, it has one very weak submission and multiple complete
+    failures to submit anything. It’s hard to decouple at this point if
+    it’s the issue of the API provider, <a
+    href="https://huggingface.co/moonshotai/Kimi-K2.6">the model
+    itself</a> or potentially some misconfiguration. For example, in
+    some cases the model kept thinking for &gt; 100k tokens on first
+    turn, a dedicated thinking budget would help here. <strong>these
+    completely failed attempts are not shown on the chart</strong>;</li>
+    <li><a
+    href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro">DeepSeek
+    V4</a> seems good on this task, but not at the top level;</li>
+    <li><a href="https://huggingface.co/unsloth/Qwen3.6-27B-GGUF">Qwen
+    3.6-27B</a> is very strong. It’s obviously not in the same league as
+    the frontier models, but for a tiny model which can easily fit on a
+    single consumer GPU it does a very good job and retains a large
+    fraction of its performance when quantized. More tests for this
+    model are coming;</li>
+    </ul>
+    <h3 id="references">References:</h3>
+    <ul>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench">Benchmark
+    source code (llama-sandbox/validation-bench)</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">Previous
+    note</a></li>
+    <li><a href="https://www.kimi.com/blog/kimi-k2-6">Kimi K2.6
+    Announcement</a></li>
+    <li><a href="https://huggingface.co/moonshotai/Kimi-K2.6">Kimi K2.6
+    on Hugging Face</a></li>
+    <li><a
+    href="https://huggingface.co/unsloth/Qwen3.6-27B-GGUF">Unsloth Qwen
+    3.6 27B GGUF</a></li>
+    <li><a
+    href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro">DeepSeek-V4-Pro
+    on Hugging Face</a></li>
+    <li><a
+    href="https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking">Anthropic
+    adaptive thinking</a></li>
+    </ul>
+  </main>
+
+
+  <script src="/assets/js/chart.min.js"></script>
+  <script src="/assets/js/charts.js"></script>
+</body>
+</html>
