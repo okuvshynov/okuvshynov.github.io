@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validator Bench 0.0.3</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h3 id="by-turn-improvement">By turn improvement</h3>
+    <p><a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">Previous</a>
+    <a
+    href="https://okuvshynov.github.io/articles/validator-bench-0.0.2.html">results</a>
+    may suggest that this variant of the benchmark is close to
+    saturation - opus 4.7 and gpt codex 5.3 are able to get perfect
+    scores.</p>
+    <p>There are, however, multiple angles to it. First, we were looking
+    at a single combination of language to validate (toml) and language
+    to use for implementation (c++17). On top of that, we were fairly
+    generous with the budget - we let the model use 5 turns per attempt
+    to fix the issues. While the results for more language combinations
+    are backfilling, let’s take a closer look at by turn improvement for
+    toml-1.0-cpp task. We still pretty much ignore the token cost for
+    now, we’ll dive deeper into that once we have more tasks ready and
+    running.</p>
+    <p>Scoring by turn is more complicated to interpret. As we use MCC
+    as our metric, the lowest score is -1. How should the compile error
+    or failure to submit be evaluated? Negative one implies being
+    confidently wrong, while zero would be equivalent to random/trivial
+    scoring.</p>
+    <p>To show the difference and progress, we decide on score buckets,
+    and show progression - how likely are we to get a submission of
+    score within that bucket for a given turn.</p>
+    <p><img width="2100" height="1290" alt="By-turn improvement tiers for toml-1.0-cpp" src="/assets/images/validator-bench-0.0.3/tiers-toml-1.0-cpp.png" /></p>
+    <p>We can make some observations from this single chart:</p>
+    <ul>
+    <li>Opus 4.7 is consistently one-shotting the task on the very first
+    turn;</li>
+    <li>OpenAI models (gpt-5.3-codex and the recently released <a
+    href="https://openai.com/index/introducing-gpt-5-5/">GPT-5.5</a>)
+    often would reach perfect submission by turn 5;</li>
+    <li>Sonnet 4.6 is slightly better than top open-weight models;</li>
+    <li>Kimi K2.6 shows the most drastic progression - it fails to
+    submit anything on first turn because of overthinking, but gets very
+    good scores on later turns;</li>
+    </ul>
+    <h3 id="references">References:</h3>
+    <ul>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench">Benchmark
+    source code (llama-sandbox/validation-bench)</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">Validator
+    Bench (original)</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench-0.0.2.html">Validator
+    Bench 0.0.2</a></li>
+    <li><a href="https://openai.com/index/introducing-gpt-5-5/">GPT-5.5
+    announcement</a></li>
+    </ul>
+  </main>
+
+
+  <script src="/assets/js/chart.min.js"></script>
+  <script src="/assets/js/charts.js"></script>
+</body>
+</html>
