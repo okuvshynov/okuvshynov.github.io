@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Using Claude Code, May 2026</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h3 id="using-claude-code-may-2026">Using Claude Code, May 2026</h3>
+    <p>Versions used: Claude Code 2.1.123, Opus 4.7.</p>
+    <p>The workflow hasn’t changed much compared to the <a
+    href="https://okuvshynov.github.io/articles/using-claude-code.html">previous
+    note</a> - just a few specific mistakes I noticed.</p>
+    <h3 id="poor-choice-of-command-output-capture">Poor choice of
+    command output capture</h3>
+    <p>Claude Code would start a long-running command like
+    <code>foo_bar.sh | tail -n 20</code> when the important output was
+    supposed to come at the end. This has multiple disadvantages:</p>
+    <ul>
+    <li>no progress or debug output is visible until the command
+    finishes;</li>
+    <li>if something interesting happens at the beginning, we have to
+    rerun, wasting time and tokens;</li>
+    </ul>
+    <p>Recording it via <a
+    href="https://github.com/okuvshynov/dotfiles/blob/main/claude/commands/oops.md">/oops</a>
+    mitigated the issue.</p>
+    <h3 id="benchmark-scoring-issues">Benchmark scoring issues</h3>
+    <p>For project context, see <a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">Validator
+    Bench</a> and <a
+    href="https://okuvshynov.github.io/articles/validator-bench-yaml.html">Validator
+    Bench: YAML 1.2</a>.</p>
+    <p>Briefly: in this task Claude Code had to implement a
+    scorer/evaluator for a submission against a set of (already
+    existing) test cases. The submitted code is a ‘validator’ -
+    something that checks the correctness of a given JSON, TOML, etc. We
+    started with exit code only - non-zero implies ‘invalid’. This is
+    incorrect when the validator crashes or times out: judging by exit
+    code alone, a test that was supposed to be marked invalid still gets
+    a ‘good outcome’.</p>
+    <p>When I asked to switch to printing the verdict to stdout, Claude
+    Code decided to ignore the exit code entirely - so printing
+    something and then crashing would be ‘acceptable’. I think this is
+    something a good engineer should catch.</p>
+    <h3 id="reasoning-about-a-wrong-submission">Reasoning about a wrong
+    submission</h3>
+    <p>Another interesting case was asking Claude Code to explain a
+    submission for the project above. The submission was getting an MCC
+    score of -1; such a score implies a submission that is wrong every
+    time (see <a
+    href="https://en.wikipedia.org/wiki/Phi_coefficient">Phi coefficient
+    (MCC)</a>).</p>
+    <p>For two such submissions, Claude produced a plausible but
+    entirely wrong <a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/dfb00b77decc72dd0d30344d484c04aa3fa72799/validation-bench/examples/yaml-1.2-cpp17-kimi-perfectly-inverted-stuck">explanation</a>,
+    focusing on the idea that ‘the labels must be swapped’ - while the
+    actual cause was much more trivial: the solution was timing out, so
+    the scorer was marking it incorrect every time (see <a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench/examples/yaml-1.2-cpp17-kimi-infinite-loop">the
+    infinite-loop repro</a>). After manual inspection and asking Claude
+    Code to reproduce and see what was going on, it was fixed.</p>
+    <p>Some form of TDD - or at least nudging the model to reproduce -
+    still seems important. The model + assistant doesn’t do it on its
+    own.</p>
+    <h3 id="references">References</h3>
+    <ul>
+    <li><a
+    href="https://okuvshynov.github.io/articles/using-claude-code.html">Using
+    Claude Code, April 2026 (previous note)</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">Validator
+    Bench (original)</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench-yaml.html">Validator
+    Bench: YAML 1.2</a></li>
+    <li><a
+    href="https://github.com/okuvshynov/dotfiles/blob/main/claude/commands/oops.md">/oops
+    command</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Phi_coefficient">Phi
+    coefficient (MCC) on Wikipedia</a></li>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/dfb00b77decc72dd0d30344d484c04aa3fa72799/validation-bench/examples/yaml-1.2-cpp17-kimi-perfectly-inverted-stuck">Plausible-but-wrong
+    explanation example (repro)</a></li>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench/examples/yaml-1.2-cpp17-kimi-infinite-loop">Kimi
+    K2.6 infinite-loop (repro)</a></li>
+    </ul>
+  </main>
+
+
+  <script src="/assets/js/chart.min.js"></script>
+  <script src="/assets/js/charts.js"></script>
+</body>
+</html>
