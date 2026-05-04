@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validator Bench: YAML 1.2</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h3 id="validator-bench-yaml-1.2">Validator Bench: YAML 1.2</h3>
+    <p><a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">TOML
+    parsing</a> seemed to be pretty easy for top-tier models, with Opus
+    4.6-4.7 and GPT 5.3+ hitting a perfect score. Good open-weight
+    models were also fairly strong, reaching 0.9+ MCC, and <a
+    href="https://www.kimi.com/blog/kimi-k2-6">Kimi K2.6</a> <a
+    href="https://okuvshynov.github.io/articles/validator-bench-0.0.2.html">achieved
+    a perfect score</a> on one of the attempts.</p>
+    <p>Compared to TOML, getting a compliant YAML parser is considerably
+    harder - there are many more corner cases to consider.</p>
+    <p>I used <a
+    href="https://github.com/pantoniou/libfyaml">libfyaml</a> as the
+    reference YAML parser and the <a
+    href="https://github.com/yaml/yaml-test-suite">yaml-test-suite</a>
+    as the test suite.</p>
+    <p>Same as with TOML, I fully expect the models to be aware of the
+    YAML format, specification, and implementations. Still, as we can
+    see, getting a good implementation is hard.</p>
+    <p>Just as before, the model’s task is to write a validator. To
+    better distinguish between ‘validator thinks YAML is invalid’ and
+    ‘validator crashed’, the expectation is that the validator returns 0
+    and prints its verdict to stdout.</p>
+    <p>For each attempt the model can do up to 5 submissions and will
+    get test names and outcomes on failure - so, partial information
+    about which tests to fix, no full test leakage.</p>
+    <p>Each dot is the best MCC score out of 5 turns per attempt. A
+    perfect validator would score 1, random - 0, a perfectly wrong
+    validator would get -1.</p>
+    <p><img width="1500" height="472" alt="YAML 1.2 validators in c++17" src="/assets/images/validator-bench-yaml/yaml-1.2-cpp17-strip.png" /></p>
+    <p>I ran each model 5-10 times, so a boxplot would add more noise
+    than value, and we can just look at individual submissions.</p>
+    <ul>
+    <li>Opus 4.7 does well, with one of the attempts getting all samples
+    but one correct. For details on that sample and repro/validation,
+    see <a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench/examples/yaml-1.2-cpp17-opus-4-7-strongest">the
+    strongest Opus 4.7 attempt</a>;</li>
+    <li><a
+    href="https://openai.com/index/introducing-gpt-5-5/">GPT-5.5</a>
+    x-high also does well; some <a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench/examples/yaml-1.2-cpp17-gpt-5.5-repro">failed
+    examples</a> are studied;</li>
+    <li>As before, Kimi K2.6 appears strong but inconsistent. Some
+    attempts score pretty high, others are very weak - including what
+    looks like a ‘perfectly wrong’ submission. It is, however, just
+    timing out on every sample, so our scoring gives it an ‘incorrect’
+    verdict; this is not a case of a swapped label. See <a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench/examples/yaml-1.2-cpp17-kimi-infinite-loop">the
+    infinite-loop repro</a>;</li>
+    <li>As before, the GPT model seems to be using
+    competitive-programming patterns. <a
+    href="https://github.com/okuvshynov/llama-sandbox/blob/main/validation-bench/examples/yaml-1.2-cpp17-gpt-5.5-repro/solution.cpp">The
+    code</a> is not very readable and still includes the non-standard
+    <code>&lt;bits/stdc++.h&gt;</code>. Now that the harness runs in a
+    more forgiving Docker environment with g++, it actually does
+    work;</li>
+    <li>Other models are not doing well. Sonnet 4.6 has some similarity
+    to Kimi K2.6, with a few ‘good outliers’. No other model shows
+    consistently strong results;</li>
+    </ul>
+    <h3 id="next-steps">Next steps</h3>
+    <ul>
+    <li>I’ve started implementing and testing more targets and languages
+    - lua, golang, etc.;</li>
+    <li>Before that, however, we need to optimize the harness itself -
+    batched evaluation, multi-threaded evaluation of the tests
+    themselves, so that the harness isn’t blocked on a timeout in each
+    test case;</li>
+    </ul>
+    <h3 id="references">References</h3>
+    <ul>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench">Benchmark
+    source code (llama-sandbox/validation-bench)</a></li>
+    <li><a href="https://github.com/pantoniou/libfyaml">libfyaml -
+    compliant YAML parser</a></li>
+    <li><a href="https://github.com/yaml/yaml-test-suite">YAML test
+    suite</a></li>
+    <li><a href="https://yaml.org/spec/1.2.2/">YAML 1.2
+    specification</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">Validator
+    Bench (original)</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench-0.0.2.html">Validator
+    Bench 0.0.2</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench-0.0.3.html">Validator
+    Bench 0.0.3</a></li>
+    <li><a href="https://www.kimi.com/blog/kimi-k2-6">Kimi K2.6
+    announcement</a></li>
+    <li><a href="https://openai.com/index/introducing-gpt-5-5/">GPT-5.5
+    announcement</a></li>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench/examples/yaml-1.2-cpp17-opus-4-7-strongest">Opus
+    4.7 strongest attempt (repro)</a></li>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench/examples/yaml-1.2-cpp17-gpt-5.5-repro">GPT-5.5
+    failed example (repro)</a></li>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench/examples/yaml-1.2-cpp17-kimi-infinite-loop">Kimi
+    K2.6 infinite-loop (repro)</a></li>
+    </ul>
+  </main>
+
+
+  <script src="/assets/js/chart.min.js"></script>
+  <script src="/assets/js/charts.js"></script>
+</body>
+</html>
