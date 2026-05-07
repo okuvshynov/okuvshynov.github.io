@@ -1,0 +1,59 @@
+/* Closed/open weight colors mirror plot_tiers.py / plot_scores.py:
+   COLOR_CLOSED #4C72B0, COLOR_OPEN #55A868. */
+
+table.leaderboard {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+table.leaderboard th,
+table.leaderboard td {
+  padding: 0.45em 0.75em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--border);
+}
+
+table.leaderboard th:first-child,
+table.leaderboard td:first-child {
+  text-align: left;
+  font-family: var(--mono-font);
+  font-size: 0.92em;
+}
+
+table.leaderboard th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+table.leaderboard th:hover {
+  background-color: var(--accent-bg);
+}
+
+table.leaderboard th.sort-asc::after { content: " \25B2"; font-size: 0.75em; opacity: 0.7; }
+table.leaderboard th.sort-desc::after { content: " \25BC"; font-size: 0.75em; opacity: 0.7; }
+
+table.leaderboard tr.row-closed { background-color: rgba(76, 114, 176, 0.08); }
+table.leaderboard tr.row-open   { background-color: rgba(85, 168, 104, 0.10); }
+
+table.leaderboard tr.row-closed > td:first-child { color: #4C72B0; }
+table.leaderboard tr.row-open   > td:first-child { color: #55A868; }
+
+@media (prefers-color-scheme: dark) {
+  table.leaderboard tr.row-closed { background-color: rgba(76, 114, 176, 0.18); }
+  table.leaderboard tr.row-open   { background-color: rgba(85, 168, 104, 0.20); }
+  table.leaderboard tr.row-closed > td:first-child { color: #8fb1de; }
+  table.leaderboard tr.row-open   > td:first-child { color: #8ad29e; }
+}
+
+/* Bootstrap SE: small muted line under each point estimate. */
+table.leaderboard td .se {
+  display: block;
+  font-size: 0.78em;
+  color: var(--text-light);
+  font-variant-numeric: tabular-nums;
+  font-weight: normal;
+  margin-top: 1px;
+}
