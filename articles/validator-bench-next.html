@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validator Bench: Leaderboard</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h3 id="validator-bench-leaderboard">Validator Bench:
+    Leaderboard</h3>
+    <p>More context about the benchmark setup can be found <a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">here</a>,
+    with a per-step study <a
+    href="https://okuvshynov.github.io/articles/validator-bench-0.0.3.html">here</a>
+    and the YAML task description and corner cases <a
+    href="https://okuvshynov.github.io/articles/validator-bench-yaml.html">here</a>.
+    Briefly: the model needs to implement a validator for some language
+    (JSON, TOML, etc.) according to a specification, and is scored based
+    on its performance on a predefined test set with hundreds of test
+    cases.</p>
+    <p>The benchmark tests a combination of entities across several
+    dimensions:</p>
+    <ul>
+    <li>‘model’ - tries to solve the problem. It can be further broken
+    down by quantization level, inference engine, sampling settings,
+    reasoning settings, etc., but for now it’s considered a single flat
+    entity, for example <code>anthropic-claude-opus-4-7-adaptive</code>,
+    <code>gpt-5.5-xhigh</code> or <code>qwen3.6-27b-q4_k_xl</code>. The
+    ‘agent’ is minimal - the goal is to test the model itself.</li>
+    <li>‘task’ or ‘spec’ - what does the validator need to validate? For
+    example, <a href="https://toml.io/en/v1.0.0">TOML 1.0</a>, <a
+    href="https://yaml.org/spec/1.2.2/">YAML 1.2</a>, <a
+    href="https://github.com/hashicorp/hcl/blob/main/spec.md">HCL 2</a>
+    or <a
+    href="https://github.com/sqlite/sqlite/blob/master/src/parse.y">Sqlite
+    SQL dialect</a>.</li>
+    <li>‘environment’ - where and how is the solution submitted by a
+    model built and run? Currently, it’s a set of programming languages
+    - C++, Zig, etc. Models are allowed to use the standard library for
+    the language, but no external packages.</li>
+    </ul>
+    <p>We fully expect models to know what YAML or C++ is. Some of the
+    tests might also have been seen by the model in training data.
+    Unless models cheat by hardcoding answers (not a single case like
+    that was found by spot checks), we can still make some useful
+    observations about model’s performance; it’s hard to make
+    generalization claims anyway for any existing coding benchmarks like
+    SWE-bench Verified.</p>
+    <h4 id="leaderboard">Leaderboard</h4>
+    <p>This is a leaderboard for 6 selected models and (TOML-1.0, YAML
+    1.2, HCL 2) x (with-specification, without-specification) x (C++17,
+    zig) set of tasks. For each task the model gets multiple independent
+    attempts, so we can understand the variance within a task.</p>
+    <table>
+    <thead>
+    <tr>
+    <th>model</th>
+    <th>P(acc≥0.90)</th>
+    <th>P(acc≥0.99)</th>
+    <th>P(acc≥1.00)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>opus-4-7-adaptive</td>
+    <td><strong>0.850</strong></td>
+    <td><strong>0.717</strong></td>
+    <td>0.528</td>
+    </tr>
+    <tr>
+    <td>gpt-5.5-xhigh</td>
+    <td>0.706</td>
+    <td>0.642</td>
+    <td><strong>0.567</strong></td>
+    </tr>
+    <tr>
+    <td>sonnet-4-6-enabled</td>
+    <td>0.631</td>
+    <td>0.200</td>
+    <td>0.033</td>
+    </tr>
+    <tr>
+    <td>glm-5p1</td>
+    <td>0.533</td>
+    <td>0.250</td>
+    <td>0.150</td>
+    </tr>
+    <tr>
+    <td>deepseek-v4-pro-thinking</td>
+    <td>0.363</td>
+    <td>0.071</td>
+    <td>0.037</td>
+    </tr>
+    <tr>
+    <td>kimi-k2.6-thinking</td>
+    <td>0.304</td>
+    <td>0.044</td>
+    <td>0.000</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>In the previous notes about this benchmark we used MCC; for these
+    charts we look at mean accuracy. As we mostly focus on the higher
+    end (90%+ of tests passed), this is fine and easier to reason about
+    — a trivial baseline (always return true/false, or return random
+    verdict) is not going to score over 90% on the test suites.</p>
+    <p>The way to read the data: how likely is a model to produce a
+    classifier (validator) with accuracy &gt;= x for a task/environment
+    from the dataset?</p>
+    <p><img width="1500" height="1687" alt="cumulative accuracy" src="/assets/images/validator-bench-next/accuracy_corpus.png" /></p>
+    <p>Confidence intervals here should be understood like this: if we
+    rerun the same set of tasks on fresh attempts, in 95% of cases we’d
+    expect the P(mean_accuracy &gt; threshold) to be within the
+    interval. It’s not a confidence interval for an ‘arbitrary validator
+    in an arbitrary environment we might ask a model to build’.</p>
+    <p>Observations:</p>
+    <ul>
+    <li>Opus generally dominates, but for a ‘perfect’ solution GPT 5.5
+    overtakes it. This means Opus is more likely to build a validator
+    that gets 99% of cases right, but GPT 5.5 is more likely to build a
+    perfect validator. It is within the intersection of the confidence
+    intervals and not conclusive, though. An example of an
+    almost-perfect Opus submission which affects the ranking at the top:
+    <a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench/examples/hcl-2-cpp17-opus-4-7-number-edge">solution</a>.
+    It allows numeric literals like <code>1.2.3</code>.</li>
+    <li>Sonnet has a massive decline at p99 -&gt; max — similar to Opus,
+    but even more dramatic.</li>
+    </ul>
+    <h4 id="breakdowns">Breakdowns</h4>
+    <p>We can also plot a similar chart to understand
+    language/environment breakdown; it will be a combination of a
+    model’s proficiency with a language and that language/stdlib’s
+    suitability for the task.</p>
+    <p><img width="1500" height="1687" alt="cpp vs zig" src="/assets/images/validator-bench-next/cpp17_vs_zig_headline.png" /></p>
+    <p>We can clearly see that C++17 is an easier language for these
+    models/tasks.</p>
+    <p>Here’s a breakdown by task - what language do we need to
+    validate. YAML is a clear outlier here, while TOML and HCL are
+    fairly attainable to ~90% accuracy.</p>
+    <p><img width="1500" height="1687" alt="specification type" src="/assets/images/validator-bench-next/by_spec_type_headline.png" /></p>
+    <p>We can see a big gap here and more target languages will
+    definitely help: easier languages (like JSON) for smaller, weaker
+    models and harder for stronger models.</p>
+    <h3 id="moving-to-one-shot">Moving to one shot</h3>
+    <p>After experimenting with this benchmark, I’m considering
+    simplifying it further to avoid multi-turn submissions entirely.
+    This would get rid of failures due to exceeding the context window,
+    simplify the data studies, allow batch processing of requests so we
+    can submit them in a batch with shared initial prompt, give better
+    kv-cache hit rates, avoid the possibility of leaking information
+    about tests, and further decouple the model from the coding agent —
+    there’d be no ‘agentic loop’ at all.</p>
+    <p>Plans for the one shot:</p>
+    <ul>
+    <li>We’ll need to rewrite the prompt, as currently models are
+    explicitly told that they’ll get a chance to resubmit and fix
+    compile errors, for example.</li>
+    <li>Still testing the model, not the agentic harness/coding agent.
+    The idea is to decouple the two and focus on tasks the model should
+    be able to do without much exploration. Input and expected output
+    must fit into the context window comfortably;</li>
+    <li>Simplicity: easy enough to reason about tasks and submissions,
+    and check for errors;</li>
+    <li>Being useful for a broad set of models - from frontier to quants
+    of smaller open-weight ones, which will require a broader spec
+    selection and implementation language selection;</li>
+    <li>Being able to evaluate the complexity of tasks and environments,
+    not only do model A/B testing; we should be able to learn that
+    format <code>foo</code> is harder to parse for a given model than
+    format <code>bar</code>, or that using language <code>baz</code> for
+    implementation is hard. This can guide further benchmark development
+    and potentially model training data selection;</li>
+    <li>Cost efficiency: current top models like Opus 4.7 are pretty
+    expensive to run. With one-shot we’ll be able to use batch
+    processing efficiently, make sure prompt caching is utilized,
+    generate many outputs from a single prompt to understand the
+    variance. We can also share the bulk of the prompt
+    (specification/task) between implementation languages and only
+    modify language-specific instructions (‘use C++17’ or ‘use
+    Rust’).</li>
+    <li>Adaptively pick how many independent attempts for (model, task,
+    environment) we need to run to maximize new information gain; There
+    are definitely (model, task) cells where we get results quickly and
+    consistently.</li>
+    <li>Writing tests as another benchmark. Another aspect of both
+    benchmarking and test set generation could be to ask models to find
+    counter-examples for some set of submitted solutions, reference
+    implementation and specification. We can rank the models by their
+    ability to find these test cases, as well as build a stronger test
+    corpus;</li>
+    </ul>
+    <h3 id="references">References</h3>
+    <p>Prior notes in this series:</p>
+    <ul>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench.html">Validator
+    Bench (original)</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench-0.0.2.html">Validator
+    Bench 0.0.2</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench-0.0.3.html">Validator
+    Bench 0.0.3</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench-yaml.html">Validator
+    Bench: YAML 1.2</a></li>
+    </ul>
+    <p>Specifications and tooling:</p>
+    <ul>
+    <li><a href="https://toml.io/en/v1.0.0">TOML 1.0
+    specification</a></li>
+    <li><a href="https://yaml.org/spec/1.2.2/">YAML 1.2
+    specification</a></li>
+    <li><a href="https://github.com/hashicorp/hcl/blob/main/spec.md">HCL
+    2 specification</a></li>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench">Benchmark
+    source code (llama-sandbox/validation-bench)</a></li>
+    </ul>
+    <p>Models:</p>
+    <ul>
+    <li><a href="https://www.anthropic.com/news/claude-opus-4-7">Claude
+    Opus 4.7 announcement</a></li>
+    <li><a
+    href="https://www.anthropic.com/news/claude-sonnet-4-6">Claude
+    Sonnet 4.6 announcement</a></li>
+    <li><a href="https://openai.com/index/introducing-gpt-5-5/">GPT-5.5
+    announcement</a></li>
+    <li><a href="https://z.ai/blog/glm-5.1">GLM 5.1
+    announcement</a></li>
+    <li><a href="https://fireworks.ai/models/fireworks/glm-5p1">GLM 5.1
+    on Fireworks</a></li>
+    <li><a href="https://www.kimi.com/blog/kimi-k2-6">Kimi K2.6
+    announcement</a></li>
+    <li><a
+    href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro">DeepSeek-V4-Pro
+    on Hugging Face</a></li>
+    </ul>
+  </main>
+
+</body>
+</html>
