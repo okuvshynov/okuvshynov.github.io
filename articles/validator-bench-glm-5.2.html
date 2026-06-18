@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validator Bench: GLM 5.2</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h1 id="glm-5.2">GLM 5.2</h1>
+    <p>This is a small update rerunning <a
+    href="https://okuvshynov.github.io/articles/validator-bench-next.html">similar
+    set of tests</a> with new <a href="https://z.ai/blog/glm-5.2">GLM
+    5.2</a>. I’ve limited tasks to (TOML-1.0, YAML 1.2) x
+    (with-specification, without-specification) x (C++17, zig) and
+    dropped HCL as it is too easy and does not discriminate well.</p>
+    <p>As before, I’ve used <a
+    href="https://fireworks.ai/models/fireworks/glm-5p2">Fireworks
+    API</a> for GLM 5.2 call. Despite having open weights with
+    permissive licence, it’s way too slow to run locally on my
+    setup.</p>
+    <p><img width="1634" height="978" alt="cumulative accuracy" src="/assets/images/validator-bench-glm-5.2/accuracy_corpus_8task_glm5p2.png" /></p>
+    <p>As we can see, GLM 5.2 occupies ‘slightly above Sonnet 4.6,
+    comparable to GPT-5.5’ performance niche. This is most likely the
+    strongest open weight model so far, but I need to test <a
+    href="https://platform.kimi.ai/docs/guide/kimi-k2-7-code-quickstart">Kimi
+    K2.7 Code</a></p>
+    <h3 id="references">References</h3>
+    <p>Prior notes in this series:</p>
+    <ul>
+    <li><a
+    href="https://okuvshynov.github.io/articles/validator-bench-next.html">Validator
+    Bench: Next</a></li>
+    </ul>
+    <p>Specifications and tooling:</p>
+    <ul>
+    <li><a href="https://toml.io/en/v1.0.0">TOML 1.0
+    specification</a></li>
+    <li><a href="https://yaml.org/spec/1.2.2/">YAML 1.2
+    specification</a></li>
+    <li><a
+    href="https://github.com/okuvshynov/llama-sandbox/tree/main/validation-bench">Benchmark
+    source code (llama-sandbox/validation-bench)</a></li>
+    </ul>
+    <p>Models:</p>
+    <ul>
+    <li><a href="https://z.ai/blog/glm-5.2">GLM 5.2
+    announcement</a></li>
+    <li><a href="https://fireworks.ai/models/fireworks/glm-5p2">GLM 5.2
+    on Fireworks</a></li>
+    <li><a
+    href="https://www.anthropic.com/news/claude-sonnet-4-6">Claude
+    Sonnet 4.6 announcement</a></li>
+    <li><a href="https://openai.com/index/introducing-gpt-5-5/">GPT-5.5
+    announcement</a></li>
+    <li><a
+    href="https://platform.kimi.ai/docs/guide/kimi-k2-7-code-quickstart">Kimi
+    K2.7 Code quickstart</a></li>
+    </ul>
+  </main>
+
+</body>
+</html>
