@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simul</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h2 id="simul">Simul</h2>
+    <p><a href="https://github.com/okuvshynov/simul">Code</a>.</p>
+    <p>Model needs to solve a variant of Mastermind (<a
+    href="https://en.wikipedia.org/wiki/Bulls_and_cows">Bulls &amp;
+    Cows</a>) puzzle: each opponent (‘Codemaker’) comes up with
+    four-digit secret number: all digits distinct, number cannot start
+    with 0. On each turn model (‘Codebreaker’) submits a query - another
+    number satisfying the same constraints. The response consists of two
+    numbers: how many digits were correct and in the right position, and
+    how many were correct, but in wrong position. The game continues
+    until the secret is guessed or maximum number of turns exceeded.</p>
+    <p>This well known version would be too easy, with many branches
+    being directly exposed during training. Thus, the noisy modification
+    of the puzzle is used: some of the digits might get replaced with
+    ‘?’, and the response will be computed based on the corrupted guess.
+    ‘?’ doesn’t match any digit. Corruption is stochastic, Codemakers
+    are not strategically lying on purpose. Correctly guessed secret is
+    a special case and is never corrupted - if player was supposed to
+    get ‘4 0’, ‘4 0’ will be returned and the game will end. Player’s
+    objective is unchanged: find the secret number based on this
+    imperfect information.</p>
+    <p>Model will take a role of a grandmaster playing a simul session
+    against multiple Codemakers. On each turn model will be given a
+    specific Codemaker to query. This allows to partially decouple
+    problem complexity from problem size and study long context quality
+    degradation.</p>
+    <p>Let’s use following terminology:</p>
+    <ul>
+    <li>Game/Puzzle: a single instance of Mastermind task with a single
+    secret code.</li>
+    <li>Session: a set of K &gt;= 1 games running concurrently within
+    one conversation.</li>
+    </ul>
+    <p>This task requires very little factual knowledge, has tiny input.
+    Player needs to keep track of what was asked, deduce what it implies
+    and decide on the query strategy. For each puzzle within a session
+    we can track if it was solved or not and how many turns it took. For
+    entire session we’ll know number of tokens. It will be misleading to
+    try to attribute number of tokens to individual games, as reasoning
+    about overall approach and algorithm will be reused.</p>
+    <p>As we can see, the task is a combination of long context +
+    multi-turn reasoning.</p>
+    <h3 id="setup">Setup</h3>
+    <p>The harness has just a single tool to make a guess. P(corruption)
+    is fixed at 0.2, each digit corruption is independent. So, P(‘all 4
+    digits were corrupted’) is 0.2 ^ 4 = 1.6%. P(‘No digits were
+    corrupted’) is 0.8 ^ 4 = ~40%.</p>
+    <p>Model gets 50 turns for each puzzle, the budget is shared across
+    every puzzle in the session. Model is explicitly told the objective:
+    optimize for average number of turns (not worst case), the rules and
+    limits. After simul session is ended, new one is restarted from
+    scratch - games within session share entire context, sessions share
+    nothing.</p>
+    <h3 id="errors">Errors</h3>
+    <p>If model submits invalid guess (for example, ‘0123’, ‘1’,
+    ‘2222’), the turn is wasted, but game continues. Other soft failures
+    include making more than one guess, or directing the guess to the
+    wrong Codemaker.</p>
+    <p>Hard error scenario happens when model exceeded output token
+    limit or total turn budget. In this case, entire session is stopped,
+    and only games solved by that moment are counted.</p>
+    <h3 id="baseline-results">Baseline results</h3>
+    <p>Before looking at the models, let’s establish baseline for
+    individual game as a sanity check.</p>
+    <h4 id="greedy-player">Greedy player</h4>
+    <p><a
+    href="https://github.com/okuvshynov/simul/blob/main/greedy_player.py">Greedy
+    player</a> starts with uniform prior for every valid secret code and
+    after every round computes posterior probability for each secret and
+    picks the max. It is a suboptimal player. For example, typical
+    opening like</p>
+    <pre><code>1234 | ...
+5678 | ...</code></pre>
+    <p>will be not be played at all, if at least one of ‘1234’ is a
+    match and it was not corrupted. P(secret = 5678) = 0, and greedy
+    player won’t even consider it. Player which estimates information
+    gain and combines it with greedy P(win-right-now) will do better,
+    but for our purpose greedy baseline will work. With P(corruption) =
+    0.2 greedy baseline averages 7.7-7.8 steps.</p>
+    <h4 id="randomized-player">Randomized player</h4>
+    <p>This player is the exact same greedy one, but move sampling
+    temperature is set to +inf instead of 0.0. Player picks the action
+    uniformly from all candidates with p &gt; 0. Such player can solve
+    puzzle in 11.3 turns on average.</p>
+    <h3 id="llm-results">LLM Results</h3>
+    <p>This is a pilot study to get a sense of what we can expect from
+    modern models. Let’s establish the expectations first and see if
+    they will be confirmed.</p>
+    <ul>
+    <li>single-game sessions will be reliably solved by modern
+    models.</li>
+    <li>single-game sessions turn count will be worse than greedy
+    baseline, but better than randomized;</li>
+    <li>larger simuls will see performance degradation, as context
+    grows</li>
+    <li>we’ll see some variance and might need to adjust the task
+    accordingly.</li>
+    </ul>
+    <h4 id="deepseek-v4.1-flash">Deepseek-v4.1-flash</h4>
+    <p>The model has 1M context window, 128k output per turn.
+    reasoning_effort=‘low’ was used.</p>
+    <table>
+    <thead>
+    <tr>
+    <th>n_games</th>
+    <th>n_turns</th>
+    <th>n_tokens</th>
+    <th>pct_solved</th>
+    <th>n_sessions</th>
+    <th>n_warnings</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>1</td>
+    <td>16.80</td>
+    <td>44223.55</td>
+    <td>100.00</td>
+    <td>20</td>
+    <td>0.00</td>
+    </tr>
+    <tr>
+    <td>2</td>
+    <td>17.65</td>
+    <td>31309.17</td>
+    <td>97.50</td>
+    <td>20</td>
+    <td>0.10</td>
+    </tr>
+    <tr>
+    <td>4</td>
+    <td>16.27</td>
+    <td>20828.00</td>
+    <td>100.00</td>
+    <td>10</td>
+    <td>0.30</td>
+    </tr>
+    <tr>
+    <td>6</td>
+    <td>25.13</td>
+    <td>23709.05</td>
+    <td>96.67</td>
+    <td>10</td>
+    <td>0.43</td>
+    </tr>
+    <tr>
+    <td>8</td>
+    <td>21.18</td>
+    <td>18980.41</td>
+    <td>96.25</td>
+    <td>10</td>
+    <td>0.22</td>
+    </tr>
+    <tr>
+    <td>12</td>
+    <td>31.61</td>
+    <td>14483.87</td>
+    <td>85.00</td>
+    <td>10</td>
+    <td>1.52</td>
+    </tr>
+    <tr>
+    <td>16</td>
+    <td>34.44</td>
+    <td>13019.00</td>
+    <td>90.62</td>
+    <td>10</td>
+    <td>1.21</td>
+    </tr>
+    <tr>
+    <td>20</td>
+    <td>39.36</td>
+    <td>12209.55</td>
+    <td>64.00</td>
+    <td>10</td>
+    <td>1.72</td>
+    </tr>
+    <tr>
+    <td>24</td>
+    <td>36.39</td>
+    <td>11295.10</td>
+    <td>77.50</td>
+    <td>10</td>
+    <td>1.31</td>
+    </tr>
+    <tr>
+    <td>28</td>
+    <td>47.39</td>
+    <td>13395.43</td>
+    <td>77.14</td>
+    <td>10</td>
+    <td>6.69</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>Note: n_turns, n_tokens and n_warnings are normalized per
+    attempted game, not solved game.</p>
+    <p>As we can see from this table, for sessions with a single game,
+    model reliably solves it at ~16-17 turns. As number of simultaneous
+    games grows, number of turns increases and more puzzles are not
+    getting solved. The main reasons for not being solved are turn limit
+    and token limit.</p>
+    <p>This is very interesting, as the complexity of each individual
+    puzzle has not changed at all - just mixing them up into longer
+    sessions caused this.</p>
+    <p>We can also see a sharp increase in warnings. The most common
+    warnings were: model was querying wrong Codemaker, so,
+    instruction-following had issues.</p>
+    <p>Variance looks a little high, yet we can be confident in the
+    trend.</p>
+    <p><img width="1200" height="1125" src="/assets/images/simul/dsf-nsolved.png" /></p>
+    <p>Here we see a drop in number of games solved.</p>
+    <p>And here - increase in number of turns per game:</p>
+    <p><img width="1200" height="1125" src="/assets/images/simul/dsf-nturns.png" /></p>
+    <p>Note that here number of turns counts total number of turns,
+    including failed. If we consider only succeeded turns, we’ll get a
+    biased number - only ‘luckier’ puzzles will be counted.</p>
+    <h4 id="gpt-terra-5.6">GPT Terra 5.6</h4>
+    <table>
+    <thead>
+    <tr>
+    <th>n_games</th>
+    <th>n_turns</th>
+    <th>n_tokens</th>
+    <th>pct_solved</th>
+    <th>n_sessions</th>
+    <th>n_warnings</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>1</td>
+    <td>12.15</td>
+    <td>15113.75</td>
+    <td>100.00</td>
+    <td>20</td>
+    <td>0.00</td>
+    </tr>
+    <tr>
+    <td>2</td>
+    <td>10.05</td>
+    <td>11651.85</td>
+    <td>100.00</td>
+    <td>20</td>
+    <td>0.00</td>
+    </tr>
+    <tr>
+    <td>4</td>
+    <td>10.28</td>
+    <td>9319.00</td>
+    <td>100.00</td>
+    <td>10</td>
+    <td>0.00</td>
+    </tr>
+    <tr>
+    <td>8</td>
+    <td>11.66</td>
+    <td>6809.83</td>
+    <td>100.00</td>
+    <td>10</td>
+    <td>0.01</td>
+    </tr>
+    <tr>
+    <td>12</td>
+    <td>18.16</td>
+    <td>5234.13</td>
+    <td>100.00</td>
+    <td>10</td>
+    <td>0.00</td>
+    </tr>
+    <tr>
+    <td>16</td>
+    <td>14.99</td>
+    <td>5729.38</td>
+    <td>100.00</td>
+    <td>10</td>
+    <td>0.01</td>
+    </tr>
+    <tr>
+    <td>20</td>
+    <td>22.33</td>
+    <td>5859.34</td>
+    <td>100.00</td>
+    <td>10</td>
+    <td>0.01</td>
+    </tr>
+    <tr>
+    <td>24</td>
+    <td>19.95</td>
+    <td>5126.12</td>
+    <td>100.00</td>
+    <td>10</td>
+    <td>0.01</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>Terra is less token-hungry even at max reasoning. It manages to
+    solve all puzzles consistently, yet number of turns shows the same
+    pattern.</p>
+    <p><img width="1200" height="1125" src="/assets/images/simul/terra-nturns.png" /></p>
+    <h4 id="gpt-sol-6.1">GPT Sol 6.1</h4>
+    <table>
+    <thead>
+    <tr>
+    <th>n_games</th>
+    <th>n_turns</th>
+    <th>n_tokens</th>
+    <th>pct_solved</th>
+    <th>n_sessions</th>
+    <th>n_warnings</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>1</td>
+    <td>9.10</td>
+    <td>12637.10</td>
+    <td>100.00</td>
+    <td>10</td>
+    <td>0.00</td>
+    </tr>
+    <tr>
+    <td>20</td>
+    <td>8.30</td>
+    <td>7318.11</td>
+    <td>100.00</td>
+    <td>10</td>
+    <td>0.00</td>
+    </tr>
+    <tr>
+    <td>32</td>
+    <td>8.56</td>
+    <td>5834.64</td>
+    <td>100.00</td>
+    <td>5</td>
+    <td>0.02</td>
+    </tr>
+    <tr>
+    <td>64</td>
+    <td>8.98</td>
+    <td>5195.62</td>
+    <td>100.00</td>
+    <td>3</td>
+    <td>0.01</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>This model is one of the best at the moment of writing. The
+    numbers confirm it - even at more extreme 32/64 simul sessions the
+    model can achieve much better results - under 9 turns average.
+    Running with n_games=128, however, failed due to context window
+    being exhausted. If context requirements were the same as for 64
+    games on average, we should get 5200 x 128 &lt; 700k tokens, which
+    is well within the 1M limit. This suggest that model gets less
+    efficient at longer context.</p>
+    <h3 id="conclusion">Conclusion</h3>
+    <p>The most interesting observation is that combining multiple tasks
+    of certain complexity into same context window impacts performance
+    and thus can be used to understand long-context performance.</p>
+  </main>
+
+</body>
+</html>

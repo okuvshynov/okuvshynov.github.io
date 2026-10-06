@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h1 id="running-llama.cpp-servers">running llama.cpp server(s)</h1>
+    <p>Power setup and tests</p>
+    <ol type="1">
+    <li>Manually turn on fans to max:</li>
+    </ol>
+    <pre><code>cd /sys/bus/acpi/devices/APP0001:00/
+for n in 1 2 3 4; do   echo 1 | sudo tee fan${n}_manual &gt;/dev/null;   cat fan${n}_max | sudo tee fan${n}_output &gt;/dev/null; done</code></pre>
+    <ol start="2" type="1">
+    <li>Manually set clock on all GPUs (level 2-3 is reasonable)</li>
+    </ol>
+    <pre><code>L=2   # or 3                                                             
+for c in 0 1 2 3; do                                                     
+  D=/sys/class/drm/card$c/device                                         
+  echo manual | sudo tee $D/power_dpm_force_performance_level &gt; /dev/null
+  echo $L     | sudo tee $D/pp_dpm_sclk &gt; /dev/null                      
+  echo &quot;card$c: $(grep &#39;\*&#39; $D/pp_dpm_sclk)&quot;                             
+done                                                                     </code></pre>
+    <p>Now each server separate on each GPU:</p>
+    <pre><code>./build-hip/bin/llama-server -m ~/llms/Qwen3.8-27B/Qwen3.8-27B-UD-Q4_K_XL.gguf  --chat-template-kwargs &#39;{&quot;reasoning_effort&quot;:&quot;low&quot;}&#39; -a Qwen3.8-27B-UD-Q4_K_XL.gguf --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 --spec-type draft-mtp --spec-draft-n-max 3 --jinja -ngl 99 --reasoning-budget 4096 --reasoning-budget-message $&#39;\n\nOK, I have thought enough. Time to act.&#39; --device ROCm3 --host 0.0.0.0 --port 8083</code></pre>
+    <p>Monitor temperature, frequency:</p>
+    <pre><code>watch -n1 &#39;rocm-smi --showtemp --showclocks | grep -E &quot;junction|sclk|mem\b&quot;; cat /sys/bus/acpi/devices/APP0001:00/fan*_input&#39;
+...
+GPU[0]          : Temperature (Sensor junction) (C): 70.0
+GPU[1]          : Temperature (Sensor junction) (C): 68.0
+GPU[2]          : Temperature (Sensor junction) (C): 62.0
+GPU[3]          : Temperature (Sensor junction) (C): 64.0
+GPU[0]          : sclk clock level: 2: (1204Mhz)
+GPU[1]          : sclk clock level: 2: (1204Mhz)
+GPU[2]          : sclk clock level: 2: (1204Mhz)
+GPU[3]          : sclk clock level: 2: (1204Mhz)
+1199
+2501
+2507
+2504</code></pre>
+    <p>Wall power:</p>
+    <ul>
+    <li>2xMacPro 2019</li>
+    <li>4xGPU under load @ L2 (~110-120W each)</li>
+    <li>Studio Display</li>
+    <li>MacStudio (idle)</li>
+    <li>MacMini (idle)</li>
+    <li>NW Switch</li>
+    </ul>
+    <p>~1100</p>
+    <p>2GPUs = 250.</p>
+    <p>Expectation: when turn on 4 more GPUs, I’ll see 1600-1700W;</p>
+    <h2 id="multiple-queries">Multiple queries</h2>
+    <p>It is better to have multiple queries than MTP. I get ~35 tps
+    consistently from each request, so, 140 for each mac pro.</p>
+    <p>This is much slower than modern nvidia.</p>
+    <pre><code>./build-hip/bin/llama-server -m /home/oleksandr/llms/Qwen3.8-27B/Qwen3.8-27B-UD-Q4_K_XL.gguf --chat-template-kwargs &#39;{&quot;reasoning_effort&quot;:&quot;low&quot;}&#39; -a Qwen3.8-27B-UD-Q4_K_XL.gguf --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0.0 --jinja -ngl 99 --reasoning-budget 1024 --reasoning-budget-message  &quot;OK, I have thought enough. Time to act.&quot; --device ROCm3 --host 0.0.0.0 --port 8083</code></pre>
+    <p>check if we have 1 for each reasoning budget</p>
+    <pre><code>ls -l logs/*.json | cut -d&#39;-&#39; -f 10 | sort -n | uniq -c</code></pre>
+    <p>llama on 4 GPUs separately</p>
+    <pre><code>./build-hip/bin/llama-server -m /home/oleksandr/llms/Qwen3.8-27B/Qwen3.8-27B-UD-Q5_K_XL.gguf --chat-template-kwargs &#39;{&quot;reasoning_effort&quot;:&quot;low&quot;}&#39; -a Qwen3.8-27B-UD-Q5_K_XL.gguf --temp 1.0  --top-p 0.95 --top-k 20 --min-p 0.0 --device ROCm1 --host 0.0.0.0 --port 8081  --spec-type draft-mtp --spec-draft-n-max 3</code></pre>
+    <pre><code>python run.py --reasoning-effort low --n_samples 10 --base-url &quot;http://192.168.2.4:8083/v1&quot; --seed 857 --note &quot;rb4096&quot; --n_skip 30</code></pre>
+  </main>
+
+</body>
+</html>
