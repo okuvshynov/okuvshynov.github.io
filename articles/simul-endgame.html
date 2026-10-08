@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simul endgame</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h2 id="simul-endgame">Simul Endgame</h2>
+    <p><a href="https://github.com/okuvshynov/simul">Code</a></p>
+    <p>Here we continue experimentation with the <a
+    href="https://okuvshynov.github.io/articles/simul.html">mastermind-like
+    puzzles</a> for model evaluation, except we focus on endgame.</p>
+    <p>Let’s use same terminology:</p>
+    <ul>
+    <li>Game/Puzzle: a single instance of Mastermind task with a single
+    secret code by Codemaker.</li>
+    <li>Session: a set of K &gt;= 1 games running concurrently within
+    one conversation.</li>
+    </ul>
+    <p>We give model a past history of a simul session, formatted as
+    list of tuples <code>(Codemaker, Guess, Reply)</code>, and expect
+    model to produce a final answer for all puzzles in a single turn.
+    The goal is to evaluate long single-turn reasoning, not multi-turn
+    conversation. This sort of inference is not nesessarily ‘what models
+    are good at’ - I’m sure models would have much better luck
+    implementing a solver in python. Yet, this reasoning is definitely
+    relevant to intelligence.</p>
+    <h3 id="dataset">Dataset</h3>
+    <p><a
+    href="https://github.com/okuvshynov/simul/blob/main/greedy_player.py">Greedy
+    player</a> solved 1000 games to completion. In each of those games
+    last turn is removed - so, greedy player would solve each game from
+    the dataset in a single guess. Then, for each session we pick
+    <code>4 &lt;= n_games &lt;= 12</code> games from the dataset, select
+    history for them and tell model to solve them all. Corruption
+    probability was fixed at 0.2. The history is ‘stable-shuffle-merged’
+    - the order of moves within each game is preserved, but the merge
+    itself is randomized.</p>
+    <h3 id="rules">Rules</h3>
+    <p>Instructions tell model that it has a single turn to complete as
+    many games as possible. Model needs to call the single tool
+    available with a list of (Codemaker, Guess) combinations. The fact
+    that greedy player can finish it in a single turn doesn’t mean
+    there’s only one valid option left - we might have large set of
+    valid guesses with different probabilities. Corruption probability
+    is shared with model in prompt. Model is allowed to produce one
+    guess per game.</p>
+    <h2 id="results">Results</h2>
+    <p>We study how model behavior changes based on the simul size, and,
+    more importantly, if the test itself is reasonable and can be used
+    to understand and optimize reasoning settings. <a
+    href="https://www.deepseek.com/en/news/deepseek-v4-1-flash/">Deepseek
+    v4.1 flash</a> and <a
+    href="https://openai.com/index/introducing-gpt-6-1-sol/">GPT-6.1-Sol</a>
+    are evaluated. For each size <code>4 &lt;= n_games &lt;= 12</code>
+    we run 10 sessions, and the main outcome we look for is the number
+    of correct solutions to puzzles.</p>
+    <p><img width="1200" height="1125" src="/assets/images/simul-endgame/solved.png" /></p>
+    <p>There are three types of outcomes:</p>
+    <ol type="1">
+    <li>Solved. Model submitted a guess and it was correct</li>
+    <li>Incorrect. Model submitted a guess and it was incorrect</li>
+    <li>Failed. Entire session failed because model didn’t call a
+    tool/ran out of reasoning tokens. Note that Sol was running with 64K
+    max tokens and Deepseek with 128K - as our goal is not comparing
+    models to each other, this is appropriate.</li>
+    </ol>
+    <p>We also track number of tokens:</p>
+    <p><img width="1200" height="1125" src="/assets/images/simul-endgame/endgames_tokens.png" /></p>
+    <h3 id="deepseek">Deepseek</h3>
+    <p>Quality clearly goes down, and model runs out of reasoning even
+    at <code>low</code> effort. Number of tokens seems growing, but
+    variance is high. If we were to tweak reasoning settings - logit
+    bias, hard budget, etc - we should focus on
+    <code>n_games = 4-8</code> for evaluation.</p>
+    <h3 id="sol-6.1">Sol 6.1</h3>
+    <p>Sol is consistently strong, but gets several failures at higher
+    end of n_games. What is interesting here is the token count. Fitting
+    linear model shows <code>n_tokens = 2.8k + 2.87k * n_games</code> -
+    the fixed part of the cost is very small. That was a little
+    surprising, I expected model to spend more tokens on figuring out
+    overall shared algorithm, which doesn’t seem to be the case.</p>
+    <p>For benchmarking/tuning/improving Sol we need more complicated
+    version of the test - more samples, larger reasoning window, maybe
+    stronger solver to produce games.</p>
+  </main>
+
+</body>
+</html>
