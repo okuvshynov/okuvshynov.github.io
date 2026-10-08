@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <p>Simul followups</p>
+    <ol start="0" type="1">
+    <li>Revive the ‘endgame’.</li>
+    <li>Retro-models.</li>
+    <li>Leaderboard</li>
+    <li>Quantized model tests OR quantized KV cache test.</li>
+    <li>Reasoning budget</li>
+    <li>Logit bias</li>
+    <li>Frontier - what can be useful? At least, efficiency.</li>
+    <li>Implementing solver</li>
+    <li>Reasoning proxy/reasoning tool/reasoning rewrite.</li>
+    <li>human-like reasoning - simple JIT tool?</li>
+    </ol>
+    <p>Let’s test simul with multiple quantized models.</p>
+    <p>We can even reuse past conversations to make it faster - just do
+    the ‘endgame’.</p>
+    <p>For example, we generate trajectories using Qwen 27B full
+    (BF16).</p>
+    <p>Then, we let quantized model (or model with quantized KV cache)
+    to continue from some point.</p>
+    <h3 id="endgame">Endgame</h3>
+    <p>Generate multiple endgame situation, where you can actually
+    one-shot something.</p>
+    <p>Can make it easier/harder based on number of codemakers.</p>
+    <p>We can allow making several guesses.</p>
+  </main>
+
+</body>
+</html>
