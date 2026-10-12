@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>simul: endgame examples</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h1 id="specific-endgames">Specific endgames</h1>
+    <p>Let’s look at specific games to see if we can find any
+    interesting patterns. We are working on <a
+    href="https://okuvshynov.github.io/articles/simul-endgame.html">endgame</a>
+    version of <a
+    href="https://okuvshynov.github.io/articles/simul.html">simul</a>.</p>
+    <p>First, thing to fix: in some samples, the probability for top
+    choice on the last step is equal for several options. For example,
+    <a
+    href="https://github.com/okuvshynov/simul/blob/main/greedy_player.py">greedy
+    player</a> solved the puzzle on the next turn with these
+    probabilities:</p>
+    <pre><code>&#39;2543&#39;: 0.00215
+&#39;3045&#39;: 0.01076
+&#39;3145&#39;: 0.02152
+&#39;3245&#39;: 0.01291
+&#39;3645&#39;: 0.03229
+&#39;3742&#39;: 0.05382
+&#39;3745&#39;: 0.02152
+&#39;3845&#39;: 0.01614
+&#39;3945&#39;: 0.05382
+&#39;4507&#39;: 0.13455
+&#39;4517&#39;: 0.13455
+&#39;4537&#39;: 0.02152
+&#39;6537&#39;: 0.13455
+&#39;7540&#39;: 0.13455
+&#39;7541&#39;: 0.13455
+&#39;7542&#39;: 0.08073</code></pre>
+    <p>Multiple options are <code>0.13455</code>, so in this case, the
+    fact that greedy player solved it in one move is partially luck, and
+    it will be better to filter such cases out. Having dataset where
+    there’s a single most correct answer, yet with different complexity
+    is likely to help us find more interesting patterns.</p>
+    <p>For the next steps we could compare model answer against entire
+    greedy output vector and compute regret. We can make it linear or
+    logistic, very similar to log loss. Or, ask model to produce
+    multiple candidates/probabilities, not pick a single answer. This
+    might be a good metric, we shall look into that later.</p>
+    <p>For now let’s pick several samples, where p(top choice) will be
+    unique, with different count of valid candidates:</p>
+    <pre><code>python replay.py --sample samples_unique/6203-022c42.json
+{&#39;6203&#39;: 0.8928571428571429, &#39;6213&#39;: 0.10714285714285714}
+
+python replay.py --sample samples_unique/2786-c190c1.json
+{&#39;2783&#39;: 0.016393442622950824,
+ &#39;2784&#39;: 0.0819672131147541,
+ &#39;2785&#39;: 0.0819672131147541,
+ &#39;2786&#39;: 0.8196721311475409}
+
+python replay.py --sample samples_unique/9436-e92541.json
+{&#39;2359&#39;: 0.15873015873015878,                                                          
+ &#39;2396&#39;: 0.15873015873015878,                                                          
+ &#39;2536&#39;: 0.03174603174603175,                                                          
+ &#39;2596&#39;: 0.07936507936507937,                                                          
+ &#39;2653&#39;: 0.015873015873015876,                                                         
+ &#39;2659&#39;: 0.07936507936507937,                                                          
+ &#39;5436&#39;: 0.07936507936507937,                                                          
+ &#39;9436&#39;: 0.3968253968253968}                                                           
+
+python replay.py --sample samples_unique/5740-d944a6.json  
+{ 60+ entries, top @ 9%}
+
+python replay.py --sample samples_unique/9583-95e6f1.json
+{ 200+ entries, top @ 3%}
+</code></pre>
+    <p>The way to read the output: before the last step where greedy
+    player solved the puzzle, this was the set of possible candidates,
+    with probabilities assigned to each.</p>
+    <p>Let’s run each sample individually, one game at a time.</p>
+    <table>
+    <colgroup>
+    <col style="width: 17%" />
+    <col style="width: 38%" />
+    <col style="width: 8%" />
+    <col style="width: 12%" />
+    <col style="width: 10%" />
+    <col style="width: 12%" />
+    </colgroup>
+    <thead>
+    <tr>
+    <th>model</th>
+    <th>path</th>
+    <th>n_games</th>
+    <th>pct_solved</th>
+    <th>n_tokens</th>
+    <th>n_sessions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Qwen3.8-27B-Q8</td>
+    <td>samples_unique/2786-c190c1.json</td>
+    <td>1</td>
+    <td>90.00</td>
+    <td>7779.95</td>
+    <td>20</td>
+    </tr>
+    <tr>
+    <td>Qwen3.8-27B-Q8</td>
+    <td>samples_unique/5740-d944a6.json</td>
+    <td>1</td>
+    <td>25.00</td>
+    <td>32142.60</td>
+    <td>20</td>
+    </tr>
+    <tr>
+    <td>Qwen3.8-27B-Q8</td>
+    <td>samples_unique/6203-022c42.json</td>
+    <td>1</td>
+    <td>85.00</td>
+    <td>23495.65</td>
+    <td>20</td>
+    </tr>
+    <tr>
+    <td>Qwen3.8-27B-Q8</td>
+    <td>samples_unique/9436-e92541.json</td>
+    <td>1</td>
+    <td>75.00</td>
+    <td>24007.40</td>
+    <td>20</td>
+    </tr>
+    <tr>
+    <td>Qwen3.8-27B-Q8</td>
+    <td>samples_unique/9583-95e6f1.json</td>
+    <td>1</td>
+    <td>15.00</td>
+    <td>31799.75</td>
+    <td>20</td>
+    </tr>
+    <tr>
+    <td>deepseek-flash</td>
+    <td>samples_unique/2786-c190c1.json</td>
+    <td>1</td>
+    <td>100.00</td>
+    <td>10209.10</td>
+    <td>20</td>
+    </tr>
+    <tr>
+    <td>deepseek-flash</td>
+    <td>samples_unique/5740-d944a6.json</td>
+    <td>1</td>
+    <td>95.00</td>
+    <td>54921.05</td>
+    <td>20</td>
+    </tr>
+    <tr>
+    <td>deepseek-flash</td>
+    <td>samples_unique/6203-022c42.json</td>
+    <td>1</td>
+    <td>100.00</td>
+    <td>28070.10</td>
+    <td>20</td>
+    </tr>
+    <tr>
+    <td>deepseek-flash</td>
+    <td>samples_unique/9436-e92541.json</td>
+    <td>1</td>
+    <td>100.00</td>
+    <td>33646.65</td>
+    <td>20</td>
+    </tr>
+    <tr>
+    <td>deepseek-flash</td>
+    <td>samples_unique/9583-95e6f1.json</td>
+    <td>1</td>
+    <td>95.00</td>
+    <td>46750.40</td>
+    <td>20</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>Deepseek is still doing great, but more complicated samples have
+    1 mistake each and need visibly more tokens. Local Qwen 3.8-27B
+    model shows very clear drop from cases which look easy to cases
+    which look hard.</p>
+    <p>Carefully constructing the dataset with a mix of easy/medium/hard
+    individual problems and simul session size can allow cheap and
+    efficient evaluation of models up to the current (Oct 2026)
+    frontier. We can also easily have very similar public/hidden
+    datasets and see if there’ll be a drift as models pick next
+    iteration of web data.</p>
+  </main>
+
+</body>
+</html>
