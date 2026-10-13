@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>simul: endgame variance and sample complexity</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h3 id="recap">Recap:</h3>
+    <ul>
+    <li>We ask LLM to solve one or more puzzles in a single turn;</li>
+    <li>The puzzles require very little knowledge but quite some
+    reasoning effort;</li>
+    <li>At this point it is less about comparing models to each other -
+    more about measuring reasoning quality and efficiency for each model
+    and building dataset;</li>
+    </ul>
+    <p>Previous notes with more context:</p>
+    <ul>
+    <li><a
+    href="https://okuvshynov.github.io/articles/simul.html">simul</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/simul-endgame.html">endgames</a></li>
+    <li><a
+    href="https://okuvshynov.github.io/articles/simul_endgame_examples.html">samples</a></li>
+    </ul>
+    <p><a href="https://github.com/okuvshynov/simul">Code</a></p>
+    <h3 id="variance-and-sample-complexity">Variance and sample
+    complexity</h3>
+    <p>Let’s pick several endgame samples, run models multiple times on
+    each. The models used here are strong enough to solve the individual
+    puzzle (n_games = 1), so we use token cost, not success rate as an
+    estimate for complexity.</p>
+    <p>We can also try make a guess about ‘what makes sample complex for
+    the model’. First, as we <a
+    href="https://okuvshynov.github.io/articles/simul_endgame_examples.html">saw</a>,
+    different samples have different valid sizes with different
+    probabilities for top choice. It might be that the samples which
+    have more valid choices and/or less extreme probability
+    distributions would be more challenging for the model.</p>
+    <p>Here we can see running Sol-6.1 and deepseek flash on the same 6
+    samples multiple times.</p>
+    <p><img width="1200" height="1125" src="/assets/images/simul-variance-complexity/staircase.png" /></p>
+    <p>Observations:</p>
+    <ul>
+    <li>Samples are different in complexity</li>
+    <li>We can see clear staircase pattern - models mostly agreeing with
+    each other on relative complexity</li>
+    <li>The variance between runs for same (model, sample) is
+    significant, but not huge - we can see non-overlapping boxes</li>
+    <li>The valid set size doesn’t seem to be a good predictor of
+    complexity, while p_top is stronger. We probably don’t need to dig
+    into this too much.</li>
+    </ul>
+  </main>
+
+</body>
+</html>
