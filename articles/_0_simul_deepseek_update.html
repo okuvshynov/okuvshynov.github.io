@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>simul: endgame-60 dataset</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h2 id="endgame-60-dataset">Endgame-60 dataset</h2>
+    <h3 id="task">Task</h3>
+    <p>The puzzle used for this dataset is a <a
+    href="https://okuvshynov.github.io/articles/simul.html">noisy
+    variation of Mastermind</a> - the goal is to guess a secret code by
+    making repeated guesses. Simul setup requires a model to solve
+    multiple puzzles at a time, helping push model for longer reasoning
+    and longer context while keeping individual task complexity
+    unchanged.</p>
+    <h3 id="dataset">Dataset</h3>
+    <p>This is a fixed dataset built on top of simul puzzle. It has 60
+    <a
+    href="https://okuvshynov.github.io/articles/simul-endgame.html">endgames</a>
+    with following restrictions:</p>
+    <ol type="1">
+    <li>Position is solvable in a single turn by <a
+    href="https://github.com/okuvshynov/simul/blob/main/greedy_player.py">greedy
+    player</a>.</li>
+    <li>Top probability option is unique - there are no ties. Player
+    which correctly identifies most likely answer is guaranteed to solve
+    the puzzle.</li>
+    <li>There’s more than one valid option at the final step - just
+    keeping track of what’s possible and what’s not is not going to be
+    enough - player needs to estimate posterior of candidates.</li>
+    <li>The dataset has diverse <a
+    href="https://okuvshynov.github.io/articles/simul_variance.html">complexity</a>
+    - some samples have obvious top option, others have p(top) and
+    p(second) pretty close, but always different.</li>
+    </ol>
+    <h3 id="demo-benchmark-setup">Demo benchmark setup</h3>
+    <p>Full history of guesses and noisy answers is provided. Model is
+    instructed to make a single guess - we explicitly tell model to be
+    greedy.</p>
+    <p>The 60 endgames are shuffled and organized in batches of sizes
+    2-30 (every divisor of 60). Each batch becomes a single task for the
+    model: check history for K games, and make a single guess for each
+    in one tool call.</p>
+    <p>Two models are used:</p>
+    <ul>
+    <li><a
+    href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">deepseek-ai/DeepSeek-V4.1-Flash</a></li>
+    <li><a
+    href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017">deepseek-ai/DeepSeek-V4.1-Flash-1017</a></li>
+    </ul>
+    <p>The new version claims higher reasoning efficiency, which is
+    exactly what this dataset can help validate. Old model only had data
+    for batch size = 2,3,4. For the new model all batch sizes were run
+    across reasoning settings, but to verify a claim that new model is
+    better, we can use the 2,3,4 only.</p>
+    <table>
+    <colgroup>
+    <col style="width: 20%" />
+    <col style="width: 20%" />
+    <col style="width: 20%" />
+    <col style="width: 20%" />
+    <col style="width: 20%" />
+    </colgroup>
+    <thead>
+    <tr>
+    <th>Batch size</th>
+    <th>Solved (old → new)</th>
+    <th>Δ accuracy</th>
+    <th>Tokens/solve (old → new)</th>
+    <th>Δ tokens/solve</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>2</td>
+    <td>88% → 97%</td>
+    <td>+8 pp [−2, +18]</td>
+    <td>42.7k → 30.8k</td>
+    <td><strong>−28% [−43, −10]</strong></td>
+    </tr>
+    <tr>
+    <td>3</td>
+    <td>80% → 93%</td>
+    <td>+13 pp [0, +27]</td>
+    <td>35.5k → 25.6k</td>
+    <td><strong>−28% [−43, −11]</strong></td>
+    </tr>
+    <tr>
+    <td>4</td>
+    <td>77% → 83%</td>
+    <td>+7 pp [−8, +22]</td>
+    <td>30.7k → 24.8k</td>
+    <td><strong>−19% [−36, −1]</strong></td>
+    </tr>
+    <tr>
+    <td><strong>All</strong></td>
+    <td><strong>82% → 91%</strong></td>
+    <td><strong>+9 pp [+3, +16]</strong></td>
+    <td><strong>36.6k → 27.2k</strong></td>
+    <td><strong>−26% [−35, −15]</strong></td>
+    </tr>
+    </tbody>
+    </table>
+    <p>Brackets are 95% bootstrap confidence intervals.
+    <strong>Bold</strong> means the interval excludes zero. As we can
+    see, both number of solved puzzles and tokens/solved game have
+    improved significantly, which validates the claim.</p>
+    <p>For the next step, we’ll take a look at new version performance
+    across batch sizes and reasoning budget settings.</p>
+  </main>
+
+</body>
+</html>
