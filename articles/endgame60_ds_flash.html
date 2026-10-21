@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>endgame-60: Deepseek-v4.1-Flash-1017 reasoning budget</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h2 id="reasoning-study-for-deepseek-flash">Reasoning study for
+    Deepseek Flash</h2>
+    <p>Reasoning study for <a
+    href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017">DeepSeek-V4.1-Flash-1017</a>
+    as a function of the reasoning budget and task size (not
+    complexity).</p>
+    <h3 id="setup">Setup</h3>
+    <p>The model needs to solve 60 puzzles. For more details on what the
+    puzzles are, please refer to <a
+    href="https://okuvshynov.github.io/articles/_0_simul_deepseek_update.html">dataset
+    description</a>.</p>
+    <p>For every batch size <code>bsz</code> in
+    <code>{2, 3, 4, 5, 6, 10, 12, 15, 20, 30}</code> we:</p>
+    <ul>
+    <li>Shuffle the 60 puzzles</li>
+    <li>Arrange them into batches of size <code>bsz</code></li>
+    <li>For each batch, model is requested to produce solutions for all
+    puzzles in a single turn.</li>
+    </ul>
+    <p>So, for every batch size same 60 puzzles are solved. This allows
+    to observe ‘larger tasks with more reasoning’ while keeping average
+    individual puzzle complexity constant. The puzzle inputs themselves
+    are tiny, ~3K tokens total for largest batch sizes, so even if ‘long
+    context’ is the issue, it is self-imposed by long reasoning, not a
+    property of the input.</p>
+    <p>Deepseek API supports
+    <code>low</code>/<code>high</code>/<code>max</code> settings: <a
+    href="https://api-docs.deepseek.com/guides/thinking_mode">link</a></p>
+    <h3 id="results">Results</h3>
+    <h4 id="correctness">Correctness</h4>
+    <p><img width="1200" height="1125" src="/assets/images/endgame-60-dsf-1017/effort_solved.png" /></p>
+    <p>We can clearly see quality drop as batch size grows. Despite
+    individual puzzles having same complexity, asking to solve more in a
+    single turn is much harder. Higher reasoning effort shows smaller,
+    but still dramatic drop. Smaller tasks are easier to manage, so,
+    practically, splitting work into different sessions is helpful. ‘Do
+    20 things from TODO list’ might end up suboptimal.</p>
+    <h4 id="token-usage">Token usage</h4>
+    <p><img width="1200" height="1125" src="/assets/images/endgame-60-dsf-1017/effort_tokens.png" /></p>
+    <p>Looking at token usage per batch, we can see that large batches
+    are getting ~250K tokens. Deepseek Flash has 384K token generation
+    limit, no individual batch exceeded this. At low/high level the
+    token budget plateued, so likely model is trained to allocate not
+    more than certain total budget per reasoning effort parameter.</p>
+    <h4 id="tokens-per-puzzle">Tokens per puzzle</h4>
+    <p><img width="1200" height="1125" src="/assets/images/endgame-60-dsf-1017/effort_tokens_per_puzzle.png" /></p>
+    <p>As batch size grows, model allocates less tokens for each puzzle
+    in a batch. There’s plenty of headroom for medium sizes, yet model
+    limits itself. Some flexible/adaptive reasoning approach might
+    help.</p>
+    <h4 id="tokens-vs-accuracy-tradeoff">Tokens vs Accuracy
+    tradeoff</h4>
+    <p><img width="1200" height="1125" src="/assets/images/endgame-60-dsf-1017/effort_tradeoff.png" /></p>
+    <p>There’s a clear but non-linear relationship between accuracy and
+    tokens per puzzle, which looks very similar across effort
+    levels.</p>
+    <h2 id="next-steps">Next steps:</h2>
+    <ul>
+    <li>Run on more samples to get higher confidence</li>
+    <li>Try dynamic adjustment of reasoning effort</li>
+    </ul>
+  </main>
+
+</body>
+</html>

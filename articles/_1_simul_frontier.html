@@ -10,6 +10,20 @@
   <main>
     <p><a href="/">← home</a></p>
     <h3 id="testing-frontier">Testing frontier</h3>
+    <p>Testing frontier on binary solved/failed is not fruitful; the
+    task is too easy for frontier model. Instead, we ask model to
+    produce top several choices with probabilities and compute loss. We
+    expect model to prioritize promising direction of ‘research’. Thus,
+    we can make metric a little more complex without asking model to
+    actually do arithmetic - ask for top K samples and evaluate on
+    order. ROC AUC?</p>
+    <p>Ask for top 3 options? With probabilities?</p>
+    <p>This will be a small approximation of ‘doing research’. In our
+    case verifying guess is ‘cheap’, but we can imagine that exploring
+    each option comes at some cost C - in this case, getting
+    probabilities and thus prioritizing wrong will come at the variable
+    cost.</p>
+    <p>We can use different loss functions.</p>
     <h3 id="setup">Setup</h3>
     <p>Let’s create a dataset of 60 endgames, split it into batches of
     all divisor sizes and run same model with the same settings. The 60
@@ -17,112 +31,13 @@
     choices, less prominent top option.</p>
     <p>The goal is to test if larger set of ‘same’ tasks is more complex
     to the models.</p>
-    <h3 id="results">Results</h3>
-    <p>At frontier, this seems fairly saturated. gpt-6.1-sol is very
-    close to be perfect and n_tokens actually decreases. We don’t see
-    reasoning traces, but we can assume that some of the thinking is
-    shared on figuring out the algorithm.</p>
-    <table>
-    <thead>
-    <tr>
-    <th>model</th>
-    <th>effort</th>
-    <th>n_games</th>
-    <th>pct_solved</th>
-    <th>n_tokens</th>
-    <th>n_sessions</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>2</td>
-    <td>100.00</td>
-    <td>5194.17</td>
-    <td>30</td>
-    </tr>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>3</td>
-    <td>98.33</td>
-    <td>5075.52</td>
-    <td>20</td>
-    </tr>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>4</td>
-    <td>100.00</td>
-    <td>5125.72</td>
-    <td>15</td>
-    </tr>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>5</td>
-    <td>100.00</td>
-    <td>5268.88</td>
-    <td>12</td>
-    </tr>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>6</td>
-    <td>98.33</td>
-    <td>4677.70</td>
-    <td>10</td>
-    </tr>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>10</td>
-    <td>100.00</td>
-    <td>4942.22</td>
-    <td>6</td>
-    </tr>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>12</td>
-    <td>100.00</td>
-    <td>4841.42</td>
-    <td>5</td>
-    </tr>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>15</td>
-    <td>98.33</td>
-    <td>4595.88</td>
-    <td>4</td>
-    </tr>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>20</td>
-    <td>100.00</td>
-    <td>4024.60</td>
-    <td>3</td>
-    </tr>
-    <tr>
-    <td>gpt-6.1-sol</td>
-    <td>max</td>
-    <td>30</td>
-    <td>95.00</td>
-    <td>3565.62</td>
-    <td>2</td>
-    </tr>
-    </tbody>
-    </table>
     <p>One option to make it challenging for frontier is to ask model to
     produce top K answers and ask to estimate probability, and require
     some sort of ‘meta-auc’ or log loss.</p>
-    <p>Deepseek flash is consistently solving it, but burning a lot of
-    tokens. Failures are coming from the exhaustion of token generation
-    budget.</p>
-    <p>Kimi-K3 struggles with this task.</p>
+    <h3 id="regret-and-loss">Regret and loss</h3>
+    <p>For example, we ask model to produce 5 candidates and
+    probabilities. We compute sum(p_1, … p_5) and compare it to
+    sum(top_5) in the greedy player.</p>
   </main>
 
 </body>
