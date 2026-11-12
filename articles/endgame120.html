@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Endgame-120</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h3 id="endgame-120">Endgame-120</h3>
+    <p>This is a new version of a <a
+    href="https://okuvshynov.github.io/articles/endgame60_ds_flash.html">endgame
+    benchmark</a> with 120 unique hidden samples. The runner can be
+    found <a href="https://github.com/okuvshynov/endgame">here</a>, but
+    dataset is closed.</p>
+    <p>Background: this benchmark is testing reasoning ability. Models
+    need to solve a puzzle in a single turn. In a <a
+    href="themsel://okuvshynov.github.io/articles/simul-endgame.html">simul</a>
+    setup multiple puzzles need to be solved in one request. Here we do
+    a pilot of the hidden dataset solving one puzzle per attempt to
+    establish a baseline.</p>
+    <p><img width="1200" height="1125" src="/assets/images/endgame120/frontier.png" /></p>
+    <p>The cost dimension is preresented as tokens, not $, because
+    providers can change pricing and tokens have hard limits: context
+    window and max output, so it’s important to understand the cost in
+    that currency.</p>
+    <p>On a very first glance, Sol-6.1 looks very good. Deepseek Flash
+    is very capable, but requires lots of tokens even at low reasoning
+    effort - there is, in fact, not that much difference between the
+    predefined levels.</p>
+    <p>At max reasoning models are getting close to perfect score, so a
+    harder version of the same benchamark with multiple puzzles is the
+    next thing to test.</p>
+  </main>
+
+</body>
+</html>
