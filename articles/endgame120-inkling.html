@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Endgame-120: Inkling-Small-2</title>
+  <link rel="stylesheet" href="/assets/css/simple.css">
+</head>
+<body>
+  <main>
+    <p><a href="/">← home</a></p>
+    <h3 id="adding-inkling-small-2">Adding Inkling-Small-2</h3>
+    <p><a
+    href="https://huggingface.co/thinkingmachines/Inkling-2-Small">Inkling
+    2 Small</a> is a new model by thinking machines, let’s run it with
+    different levels of reasoning effort. Background: <a
+    href="https://okuvshynov.github.io/articles/endgame120.html">endgame-120</a>
+    is testing reasoning ability. Models need to solve a puzzle in a
+    single turn, benchmark has 120 puzzles which are not published,
+    while the harness for running is <a
+    href="https://github.com/okuvshynov/endgame">here</a>.</p>
+    <p><img width="1200" height="1125" src="/assets/images/endgame120-inkling-small/plot.png" /></p>
+    <p>It can solve puzzles at high reasoning effort, but uses a lot of
+    tokens for that, even more than deepseek flash. Inkling supports
+    arbitrary reasoning effort in [0; 1) range, with low/medium/high
+    being <a
+    href="https://tinker-docs.thinkingmachines.ai/cookbook/inkling/thinking-effort/">defined</a>
+    as 0.2/0.7/0.9. Running <a
+    href="https://okuvshynov.github.io/articles/simul-endgame.html">simul</a>
+    setup will be hard - replicating <a
+    href="https://okuvshynov.github.io/articles/endgame60_ds_flash.html">Deepseek
+    Flash study</a> will likely exceed the context limit of 256K.</p>
+    <p>When running on Thinking Machines API endpoint each run was
+    fairly slow - 50-70 tps, which translates to &gt; 20 min for puzzle
+    at high reasoning, so parallel runner is a must.</p>
+  </main>
+
+</body>
+</html>
